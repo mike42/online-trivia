@@ -1,0 +1,9 @@
+<?php
+class database {
+	private static $config;
+
+	public static function init() {
+		self::
+	}
+}
+?>
