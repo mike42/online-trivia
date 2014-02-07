@@ -1,0 +1,7 @@
+<?php
+
+/* Database connection options */
+$config['database']['user'] = "trivia";
+$config['database']['pass'] = "...";
+$config['database']['host'] = "localhost";
+$config['database']['db'] = "smartphone_trivia";
