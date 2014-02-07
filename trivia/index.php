@@ -13,7 +13,7 @@ Core::$config = $config;
 
 /* Get page (or go to default if none is specified) */
 if(isset($_GET['p']) && $_GET['p'] != '') {
-	$arg = split('/', $_REQUEST['p']);
+	$arg = explode('/', $_REQUEST['p']);
 } else {
 	$arg = $config['default']['arg'];
 }
