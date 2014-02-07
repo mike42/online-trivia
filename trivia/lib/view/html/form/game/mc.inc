@@ -13,7 +13,7 @@
 <div id="title-pane" class="main-info jumbotron">
 	<h1><?php echo core::escapeHTML($data['game'] -> get_game_name()); ?></h1>
 	<p class="lead">
-		<img src="public/question-box.png" style="width: 30%"/>
+		<img src="/assets/question-box.png" style="width: 30%"/>
 	</p>
 </div>
 

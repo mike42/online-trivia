@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="shortcut icon" href="public/favicon.ico">
+    <link rel="shortcut icon" href="assets/favicon.ico">
 
     <title>Trivia</title>
-    <link href="public/css/bootstrap.min.css" rel="stylesheet">
-    <link href="public/css/trivia.css" rel="stylesheet">
+    <link href="/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/css/trivia.css" rel="stylesheet">
   </head>
 
   <body>
@@ -20,7 +20,7 @@
 include(dirname(__FILE__) . "/form/" . $data['template'] . ".inc");
 ?>
     </div>
-    <script src="public/js/bootstrap.min.js"></script>
+    <script src="/assets/js/bootstrap.min.js"></script>
   </body>
 </html>
 
