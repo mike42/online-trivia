@@ -364,5 +364,23 @@ class answer_model {
 		}
 		return $ret;
 	}
+	
+	public static function list_unmarked() {
+		$sth = database::$dbh -> prepare("SELECT answer.question_id, answer.team_id, answer.answer_text, answer.answer_is_correct, answer.answer_time, question.question_id, question.round_id, question.question_text, question.question_sortkey, question.question_state, team.team_id, team.team_code, team.game_id, team.team_name, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM answer JOIN question ON answer.question_id = question.question_id JOIN team ON answer.team_id = team.team_id JOIN round ON question.round_id = round.round_id JOIN game ON team.game_id = game.game_id WHERE answer.answer_is_correct = 0 ORDER BY round.round_sortkey, question.question_sortkey");
+		$sth -> execute(array());
+		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
+		$ret = array();
+		foreach($rows as $row) {
+			$assoc = self::row_to_assoc($row);
+			$ret[] = new answer_model($assoc);
+		}
+		return $ret;
+	}
+	
+	public static function leaderboard($game_id) {
+		$sth = database::$dbh -> prepare("SELECT person.person_id, person.person_name, count(question.question_id) AS score FROM person RIGHT JOIN person_table ON person_table.person_id = person.person_id RIGHT JOIN question ON question.round_id = person_table.round_id JOIN answer ON answer.question_id = question.question_id AND answer.team_id = person_table.team_id WHERE answer_is_correct = 2 AND person.game_id = :game_id GROUP BY person.person_id, person.person_name ORDER BY score DESC");
+		$sth -> execute(array('game_id' => $game_id));
+		return $sth -> fetchAll(PDO::FETCH_ASSOC);
+	}
 }
 ?>

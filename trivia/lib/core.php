@@ -122,4 +122,8 @@ class core {
 	public static function showHTML($data) {
 		include(dirname(__FILE__) . "/view/html/" . $data['layout'] . ".inc");
 	}
+	
+	public function redirect($location) {
+		header("location: $location");
+	}
 }

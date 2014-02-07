@@ -14,6 +14,10 @@ class game_view {
 		echo json_encode($data);
 	}
 	
+	public static function zen_json($data) {
+		echo json_encode($data);
+	}
+	
 	public static function zen_html($data) {
 		$data['layout'] = 'htmlLayout';
 		$data['template'] = 'game/zen';
@@ -23,6 +27,12 @@ class game_view {
 	public static function mc_html($data) {
 		$data['layout'] = 'htmlLayout';
 		$data['template'] = 'game/mc';
+		core::showHTML($data);	
+	}
+	
+	public static function leaderboard_html($data) {
+		$data['layout'] = 'htmlLayout';
+		$data['template'] = 'game/leaderboard';
 		core::showHTML($data);	
 	}
 

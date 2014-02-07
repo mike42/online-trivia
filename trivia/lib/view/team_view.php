@@ -12,6 +12,18 @@ class team_view {
 		core::showHTML($data);	
 	}
 	
+	public static function round_html($data) {
+		$data['layout'] = 'htmlLayout';
+		$data['template'] = 'team/round';
+		core::showHTML($data);	
+	}
+	
+	public static function people_html($data) {
+		$data['layout'] = 'htmlLayout';
+		$data['template'] = 'team/people';
+		core::showHTML($data);	
+	}
+	
 	public static function qr_png($data) {
 		include(dirname(__FILE__) . '/../vendor/phpqrcode/qrlib.php');
 		 QRcode::png($data['url']);

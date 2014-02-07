@@ -347,7 +347,7 @@ class question_model {
 		if($start > 0 && $limit > 0) {
 			$ls = " LIMIT $start, " . ($start + $limit);
 		}
-		$sth = database::$dbh -> prepare("SELECT question.question_id, question.round_id, question.question_text, question.question_sortkey, question.question_state, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM question JOIN round ON question.round_id = round.round_id JOIN game ON round.game_id = game.game_id WHERE question.round_id = :round_id" . $ls . ";");
+		$sth = database::$dbh -> prepare("SELECT question.question_id, question.round_id, question.question_text, question.question_sortkey, question.question_state, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM question JOIN round ON question.round_id = round.round_id JOIN game ON round.game_id = game.game_id WHERE question.round_id = :round_id ORDER BY question.question_sortkey" . $ls . ";");
 		$sth -> execute(array('round_id' => $round_id));
 		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
 		$ret = array();

@@ -1,4 +1,5 @@
 <div style="position: absolute; top:0; left: 0;">
+	<a class="btn btn-primary btn-sm glyphicon glyphicon-home" href="<?php echo core::constructURL("game", "read", array($data['game'] -> get_game_code()), "html"); ?>"></a><br/>
 	<a class="btn btn-primary btn-sm glyphicon glyphicon-refresh" href=""></a><br/>
 	<a class="btn btn-primary btn-sm glyphicon glyphicon-list-alt" onClick="leaderBoard();" href="#"></a><br/>
 	<a class="btn btn-info btn-sm glyphicon glyphicon-chevron-left" onClick="prev();" href="#"></a><br/>
@@ -19,7 +20,7 @@
 
 <div id="leaderboard" class="main-info jumbotron" style="display: none">
 <h1>Leader Board</h1>
-...
+<div id="leaderboard-frame"></div>
 </div>
 
 <div id="round" class="main-info jumbotron" style="display: none">
@@ -133,7 +134,9 @@ function setQuestion(q) {
 }
 
 function leaderBoard() {
+	$('#leaderboard-frame').html("Loading...");
 	activate('leaderboard');
+	$('#leaderboard-frame').load(<?php echo json_encode(core::constructURL("game", "leaderboard", array($data['game'] -> get_game_code()), "html")); ?>)
 	return false;
 }
 
