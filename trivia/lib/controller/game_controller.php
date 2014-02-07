@@ -15,7 +15,7 @@ class game_controller {
 	public static function read($game_code) {
 		$game = game_model::get_by_game_code($game_code);
 		if($game === false) {
-			return array('error' => "Feature does not exist");
+			return array('error' => "Game does not exist");
 		}
 		$game -> populate_list_team();
 		$game -> populate_list_round();

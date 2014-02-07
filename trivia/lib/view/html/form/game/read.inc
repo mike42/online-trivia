@@ -44,7 +44,8 @@
 	<?php
 		foreach($data['game'] -> list_team as $team) {
 			echo "<li class=\"list-group-item\">" .
-			"<button type=\"button\" class=\"btn btn-default btn-xs\" style=\"float: right\" onClick=\"alert('Button doesnt do anything yet!');\"><span class=\"glyphicon glyphicon-qrcode\"></span></button>" .
+			"<button type=\"button\" class=\"btn btn-default btn-xs\" style=\"float: right\" onClick=\"showTeam('".$team -> get_team_code()."')\"><span class=\"glyphicon glyphicon-qrcode\"></span></button>" .
+			"<button type=\"button\" class=\"btn btn-default btn-xs\" style=\"float: right\" onClick=\"alert('Button doesnt do anything yet!');\"><span class=\"glyphicon glyphicon-pencil\"></span></button>" .
 			"<button type=\"button\" class=\"btn btn-default btn-xs\" style=\"float: right\" onClick=\"alert('Button doesnt do anything yet!');\"><span class=\"glyphicon glyphicon-trash\"></span></button>" .
 				core::escapeHTML($team -> get_team_name()) . "</li>";
 		}
@@ -81,3 +82,31 @@
 		</form>
 	</div>
 </div>
+
+<div class="modal fade" id="modal-team">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Team Info</h4>
+      </div>
+      <div class="modal-body">
+      	<div id="modal-team-links"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<script type="text/javascript">
+function showTeam(team_code) {
+	$('#modal-team-links').html('Loading...');
+	$('#modal-team').modal();
+	$('#modal-team-links').load('/team/qr/' + team_code);
+	return false;
+}
+
+
+</script>
