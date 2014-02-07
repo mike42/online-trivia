@@ -6,6 +6,12 @@ class team_view {
 		core::showHTML($data);
 	}
 	
+	public static function read_html($data) {
+		$data['layout'] = 'htmlLayout';
+		$data['template'] = 'team/read';
+		core::showHTML($data);	
+	}
+	
 	public static function qr_png($data) {
 		include(dirname(__FILE__) . '/../vendor/phpqrcode/qrlib.php');
 		 QRcode::png($data['url']);
