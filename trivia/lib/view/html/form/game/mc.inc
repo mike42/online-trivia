@@ -159,23 +159,28 @@ function update() {
 				if(cur_q == 0) {
 					$('#team-'+key).text(val);
 				} else {
-					$('#team-'+key).text('_');
+					if(val == 0) {
+						$('#team-'+key).text('...');
+					} else {
+						$('#team-'+key).text('OK');
+					}
 				}
 				$('#team-'+key).toggleClass( 'label-default', val == 0);
-				$('#team-'+key).toggleClass( 'label-warning', val != 0);
+				$('#team-'+key).toggleClass( 'label-primary', val != 0);
 			});
+			update_repeat(2000);
 		})
 		.fail(function() {
-			// Error (will repeat)
+			update_repeat(1000);
 		})
 		.always(function() {
-			update_repeat();
+			//
 		});
 	}
 	return false;
 }
 
-function update_repeat() {
+function update_repeat(delay) {
 	if(timer_is_on == 1) {
 		clearTimeout(t);
 		timer_is_on=0;
@@ -183,7 +188,7 @@ function update_repeat() {
 	
 	if(active == 'round') {
 		timer_is_on=1;
-		t = setTimeout(update, 3000);
+		t = setTimeout(update, delay);
 	}
 }
 </script>

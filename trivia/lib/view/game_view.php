@@ -9,7 +9,11 @@ class game_view {
 		$data['template'] = 'game/read';
 		core::showHTML($data);	
 	}
-
+	
+	public static function read_json($data) {
+		echo json_encode($data);
+	}
+	
 	public static function zen_html($data) {
 		$data['layout'] = 'htmlLayout';
 		$data['template'] = 'game/zen';
@@ -34,5 +38,10 @@ class game_view {
 		$data['layout'] = 'htmlLayout';
 		$data['template'] = 'error';
 		core::showHTML($data);
+	}
+	
+	public static function error_json($data) {
+		header("HTTP/1.1 500 Internal Server Error");
+		echo json_encode($data);
 	}
 }

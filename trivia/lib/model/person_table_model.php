@@ -186,14 +186,18 @@ class person_table_model {
 
 		/* Compose list of changed fields */
 		$fieldset = array();
+		$everything = $this -> to_array();
+		$data['round_id'] = $this -> get_round_id();
+		$data['person_id'] = $this -> get_person_id();
 		foreach($this -> model_variables_changed as $col => $changed) {
 			$fieldset[] = "$col = :$col";
+			$data[$col] = $everything[$col];
 		}
 		$fields = implode(", ", $fieldset);
 
 		/* Execute query */
 		$sth = database::$dbh -> prepare("UPDATE person_table SET $fields WHERE round_id = :round_id AND person_id = :person_id");
-		$sth -> execute($this -> to_array());
+		$sth -> execute($data);
 	}
 
 	/**
@@ -206,16 +210,19 @@ class person_table_model {
 
 		/* Compose list of set fields */
 		$fieldset = array();
+		$data = array();
+		$everything = $this -> to_array();
 		foreach($this -> model_variables_set as $col => $changed) {
 			$fieldset[] = $col;
 			$fieldset_colon[] = ":$col";
+			$data[$col] = $everything[$col];
 		}
 		$fields = implode(", ", $fieldset);
 		$vals = implode(", ", $fieldset_colon);
 
 		/* Execute query */
 		$sth = database::$dbh -> prepare("INSERT INTO person_table ($fields) VALUES ($vals);");
-		$sth -> execute($this -> to_array());
+		$sth -> execute($data);
 	}
 
 	/**
@@ -223,13 +230,13 @@ class person_table_model {
 	 */
 	public function delete() {
 		$sth = database::$dbh -> prepare("DELETE FROM person_table WHERE round_id = :round_id AND person_id = :person_id");
-		$sth -> execute($this -> to_array());
+		$data['round_id'] = $this -> get_round_id();
+		$data['person_id'] = $this -> get_person_id();
+		$sth -> execute($data);
 	}
 
 	/**
 	 * Retrieve by primary key
-	 * 
-	 * 
 	 */
 	public static function get($round_id, $person_id) {
 		$sth = database::$dbh -> prepare("SELECT person_table.round_id, person_table.person_id, person_table.team_id, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, person.person_id, person.person_name, person.game_id, team.team_id, team.team_code, team.game_id, team.team_name, game.game_id, game.game_name, game.game_state, game.game_code FROM person_table JOIN round ON person_table.round_id = round.round_id JOIN person ON person_table.person_id = person.person_id JOIN team ON person_table.team_id = team.team_id JOIN game ON round.game_id = game.game_id WHERE person_table.round_id = :round_id AND person_table.person_id = :person_id;");

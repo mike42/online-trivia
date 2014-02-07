@@ -208,14 +208,17 @@ class team_model {
 
 		/* Compose list of changed fields */
 		$fieldset = array();
+		$everything = $this -> to_array();
+		$data['team_id'] = $this -> get_team_id();
 		foreach($this -> model_variables_changed as $col => $changed) {
 			$fieldset[] = "$col = :$col";
+			$data[$col] = $everything[$col];
 		}
 		$fields = implode(", ", $fieldset);
 
 		/* Execute query */
 		$sth = database::$dbh -> prepare("UPDATE team SET $fields WHERE team_id = :team_id");
-		$sth -> execute($this -> to_array());
+		$sth -> execute($data);
 	}
 
 	/**
@@ -228,16 +231,19 @@ class team_model {
 
 		/* Compose list of set fields */
 		$fieldset = array();
+		$data = array();
+		$everything = $this -> to_array();
 		foreach($this -> model_variables_set as $col => $changed) {
 			$fieldset[] = $col;
 			$fieldset_colon[] = ":$col";
+			$data[$col] = $everything[$col];
 		}
 		$fields = implode(", ", $fieldset);
 		$vals = implode(", ", $fieldset_colon);
 
 		/* Execute query */
 		$sth = database::$dbh -> prepare("INSERT INTO team ($fields) VALUES ($vals);");
-		$sth -> execute($this -> to_array());
+		$sth -> execute($data);
 	}
 
 	/**
@@ -245,7 +251,8 @@ class team_model {
 	 */
 	public function delete() {
 		$sth = database::$dbh -> prepare("DELETE FROM team WHERE team_id = :team_id");
-		$sth -> execute($this -> to_array());
+		$data['team_id'] = $this -> get_team_id();
+		$sth -> execute($data);
 	}
 
 	/**
@@ -272,8 +279,6 @@ class team_model {
 
 	/**
 	 * Retrieve by primary key
-	 * 
-	 * 
 	 */
 	public static function get($team_id) {
 		$sth = database::$dbh -> prepare("SELECT team.team_id, team.team_code, team.game_id, team.team_name, game.game_id, game.game_name, game.game_state, game.game_code FROM team JOIN game ON team.game_id = game.game_id WHERE team.team_id = :team_id;");
@@ -286,6 +291,9 @@ class team_model {
 		return new team_model($assoc);
 	}
 
+	/**
+	 * Retrieve by team_code
+	 */
 	public static function get_by_team_code($team_code) {
 		$sth = database::$dbh -> prepare("SELECT team.team_id, team.team_code, team.game_id, team.team_name, game.game_id, game.game_name, game.game_state, game.game_code FROM team JOIN game ON team.game_id = game.game_id WHERE team.team_code = :team_code;");
 		$sth -> execute(array('team_code' => $team_code));

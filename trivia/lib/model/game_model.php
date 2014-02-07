@@ -201,14 +201,17 @@ class game_model {
 
 		/* Compose list of changed fields */
 		$fieldset = array();
+		$everything = $this -> to_array();
+		$data['game_id'] = $this -> get_game_id();
 		foreach($this -> model_variables_changed as $col => $changed) {
 			$fieldset[] = "$col = :$col";
+			$data[$col] = $everything[$col];
 		}
 		$fields = implode(", ", $fieldset);
 
 		/* Execute query */
 		$sth = database::$dbh -> prepare("UPDATE game SET $fields WHERE game_id = :game_id");
-		$sth -> execute($this -> to_array());
+		$sth -> execute($data);
 	}
 
 	/**
@@ -221,16 +224,19 @@ class game_model {
 
 		/* Compose list of set fields */
 		$fieldset = array();
+		$data = array();
+		$everything = $this -> to_array();
 		foreach($this -> model_variables_set as $col => $changed) {
 			$fieldset[] = $col;
 			$fieldset_colon[] = ":$col";
+			$data[$col] = $everything[$col];
 		}
 		$fields = implode(", ", $fieldset);
 		$vals = implode(", ", $fieldset_colon);
 
 		/* Execute query */
 		$sth = database::$dbh -> prepare("INSERT INTO game ($fields) VALUES ($vals);");
-		$sth -> execute($this -> to_array());
+		$sth -> execute($data);
 	}
 
 	/**
@@ -238,7 +244,8 @@ class game_model {
 	 */
 	public function delete() {
 		$sth = database::$dbh -> prepare("DELETE FROM game WHERE game_id = :game_id");
-		$sth -> execute($this -> to_array());
+		$data['game_id'] = $this -> get_game_id();
+		$sth -> execute($data);
 	}
 
 	/**
@@ -276,8 +283,6 @@ class game_model {
 
 	/**
 	 * Retrieve by primary key
-	 * 
-	 * 
 	 */
 	public static function get($game_id) {
 		$sth = database::$dbh -> prepare("SELECT game.game_id, game.game_name, game.game_state, game.game_code FROM game  WHERE game.game_id = :game_id;");
@@ -290,6 +295,9 @@ class game_model {
 		return new game_model($assoc);
 	}
 
+	/**
+	 * Retrieve by game_code
+	 */
 	public static function get_by_game_code($game_code) {
 		$sth = database::$dbh -> prepare("SELECT game.game_id, game.game_name, game.game_state, game.game_code FROM game  WHERE game.game_code = :game_code;");
 		$sth -> execute(array('game_code' => $game_code));
@@ -299,6 +307,13 @@ class game_model {
 		}
 		$assoc = self::row_to_assoc($row);
 		return new game_model($assoc);
+	}
+	
+	public function reset() {
+		$sth = database::$dbh -> prepare("DELETE answer FROM answer JOIN question ON answer.question_id = question.question_id JOIN round ON round.round_id = question.round_id WHERE round.game_id = :game_id;");
+		$sth -> execute(array('game_id' => $this -> get_game_id()));
+		$sth = database::$dbh -> prepare("DELETE person_table FROM person_table JOIN person ON person.person_id = person_table.person_id JOIN game ON person.game_id = game.game_id WHERE game.game_id = :game_id;");
+		$sth -> execute(array('game_id' => $this -> get_game_id()));
 	}
 }
 ?>

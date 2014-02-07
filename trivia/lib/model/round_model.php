@@ -243,14 +243,17 @@ class round_model {
 
 		/* Compose list of changed fields */
 		$fieldset = array();
+		$everything = $this -> to_array();
+		$data['round_id'] = $this -> get_round_id();
 		foreach($this -> model_variables_changed as $col => $changed) {
 			$fieldset[] = "$col = :$col";
+			$data[$col] = $everything[$col];
 		}
 		$fields = implode(", ", $fieldset);
 
 		/* Execute query */
 		$sth = database::$dbh -> prepare("UPDATE round SET $fields WHERE round_id = :round_id");
-		$sth -> execute($this -> to_array());
+		$sth -> execute($data);
 	}
 
 	/**
@@ -263,16 +266,19 @@ class round_model {
 
 		/* Compose list of set fields */
 		$fieldset = array();
+		$data = array();
+		$everything = $this -> to_array();
 		foreach($this -> model_variables_set as $col => $changed) {
 			$fieldset[] = $col;
 			$fieldset_colon[] = ":$col";
+			$data[$col] = $everything[$col];
 		}
 		$fields = implode(", ", $fieldset);
 		$vals = implode(", ", $fieldset_colon);
 
 		/* Execute query */
 		$sth = database::$dbh -> prepare("INSERT INTO round ($fields) VALUES ($vals);");
-		$sth -> execute($this -> to_array());
+		$sth -> execute($data);
 	}
 
 	/**
@@ -280,7 +286,8 @@ class round_model {
 	 */
 	public function delete() {
 		$sth = database::$dbh -> prepare("DELETE FROM round WHERE round_id = :round_id");
-		$sth -> execute($this -> to_array());
+		$data['round_id'] = $this -> get_round_id();
+		$sth -> execute($data);
 	}
 
 	/**
@@ -296,8 +303,6 @@ class round_model {
 
 	/**
 	 * Retrieve by primary key
-	 * 
-	 * 
 	 */
 	public static function get($round_id) {
 		$sth = database::$dbh -> prepare("SELECT round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM round JOIN game ON round.game_id = game.game_id WHERE round.round_id = :round_id;");
@@ -310,6 +315,9 @@ class round_model {
 		return new round_model($assoc);
 	}
 
+	/**
+	 * Retrieve by round_sort
+	 */
 	public static function get_by_round_sort($game_id, $round_sortkey) {
 		$sth = database::$dbh -> prepare("SELECT round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM round JOIN game ON round.game_id = game.game_id WHERE round.game_id = :game_id AND round.round_sortkey = :round_sortkey;");
 		$sth -> execute(array('game_id' => $game_id, 'round_sortkey' => $round_sortkey));

@@ -248,14 +248,17 @@ class question_model {
 
 		/* Compose list of changed fields */
 		$fieldset = array();
+		$everything = $this -> to_array();
+		$data['question_id'] = $this -> get_question_id();
 		foreach($this -> model_variables_changed as $col => $changed) {
 			$fieldset[] = "$col = :$col";
+			$data[$col] = $everything[$col];
 		}
 		$fields = implode(", ", $fieldset);
 
 		/* Execute query */
 		$sth = database::$dbh -> prepare("UPDATE question SET $fields WHERE question_id = :question_id");
-		$sth -> execute($this -> to_array());
+		$sth -> execute($data);
 	}
 
 	/**
@@ -268,16 +271,19 @@ class question_model {
 
 		/* Compose list of set fields */
 		$fieldset = array();
+		$data = array();
+		$everything = $this -> to_array();
 		foreach($this -> model_variables_set as $col => $changed) {
 			$fieldset[] = $col;
 			$fieldset_colon[] = ":$col";
+			$data[$col] = $everything[$col];
 		}
 		$fields = implode(", ", $fieldset);
 		$vals = implode(", ", $fieldset_colon);
 
 		/* Execute query */
 		$sth = database::$dbh -> prepare("INSERT INTO question ($fields) VALUES ($vals);");
-		$sth -> execute($this -> to_array());
+		$sth -> execute($data);
 	}
 
 	/**
@@ -285,7 +291,8 @@ class question_model {
 	 */
 	public function delete() {
 		$sth = database::$dbh -> prepare("DELETE FROM question WHERE question_id = :question_id");
-		$sth -> execute($this -> to_array());
+		$data['question_id'] = $this -> get_question_id();
+		$sth -> execute($data);
 	}
 
 	/**
@@ -301,8 +308,6 @@ class question_model {
 
 	/**
 	 * Retrieve by primary key
-	 * 
-	 * 
 	 */
 	public static function get($question_id) {
 		$sth = database::$dbh -> prepare("SELECT question.question_id, question.round_id, question.question_text, question.question_sortkey, question.question_state, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM question JOIN round ON question.round_id = round.round_id JOIN game ON round.game_id = game.game_id WHERE question.question_id = :question_id;");
@@ -315,6 +320,9 @@ class question_model {
 		return new question_model($assoc);
 	}
 
+	/**
+	 * Retrieve by question_sort
+	 */
 	public static function get_by_question_sort($round_id, $question_sortkey) {
 		$sth = database::$dbh -> prepare("SELECT question.question_id, question.round_id, question.question_text, question.question_sortkey, question.question_state, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM question JOIN round ON question.round_id = round.round_id JOIN game ON round.game_id = game.game_id WHERE question.round_id = :round_id AND question.question_sortkey = :question_sortkey;");
 		$sth -> execute(array('round_id' => $round_id, 'question_sortkey' => $question_sortkey));

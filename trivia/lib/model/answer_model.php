@@ -254,14 +254,18 @@ class answer_model {
 
 		/* Compose list of changed fields */
 		$fieldset = array();
+		$everything = $this -> to_array();
+		$data['question_id'] = $this -> get_question_id();
+		$data['team_id'] = $this -> get_team_id();
 		foreach($this -> model_variables_changed as $col => $changed) {
 			$fieldset[] = "$col = :$col";
+			$data[$col] = $everything[$col];
 		}
 		$fields = implode(", ", $fieldset);
 
 		/* Execute query */
 		$sth = database::$dbh -> prepare("UPDATE answer SET $fields WHERE question_id = :question_id AND team_id = :team_id");
-		$sth -> execute($this -> to_array());
+		$sth -> execute($data);
 	}
 
 	/**
@@ -274,16 +278,19 @@ class answer_model {
 
 		/* Compose list of set fields */
 		$fieldset = array();
+		$data = array();
+		$everything = $this -> to_array();
 		foreach($this -> model_variables_set as $col => $changed) {
 			$fieldset[] = $col;
 			$fieldset_colon[] = ":$col";
+			$data[$col] = $everything[$col];
 		}
 		$fields = implode(", ", $fieldset);
 		$vals = implode(", ", $fieldset_colon);
 
 		/* Execute query */
 		$sth = database::$dbh -> prepare("INSERT INTO answer ($fields) VALUES ($vals);");
-		$sth -> execute($this -> to_array());
+		$sth -> execute($data);
 	}
 
 	/**
@@ -291,13 +298,13 @@ class answer_model {
 	 */
 	public function delete() {
 		$sth = database::$dbh -> prepare("DELETE FROM answer WHERE question_id = :question_id AND team_id = :team_id");
-		$sth -> execute($this -> to_array());
+		$data['question_id'] = $this -> get_question_id();
+		$data['team_id'] = $this -> get_team_id();
+		$sth -> execute($data);
 	}
 
 	/**
 	 * Retrieve by primary key
-	 * 
-	 * 
 	 */
 	public static function get($question_id, $team_id) {
 		$sth = database::$dbh -> prepare("SELECT answer.question_id, answer.team_id, answer.answer_text, answer.answer_is_correct, answer.answer_time, question.question_id, question.round_id, question.question_text, question.question_sortkey, question.question_state, team.team_id, team.team_code, team.game_id, team.team_name, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM answer JOIN question ON answer.question_id = question.question_id JOIN team ON answer.team_id = team.team_id JOIN round ON question.round_id = round.round_id JOIN game ON team.game_id = game.game_id WHERE answer.question_id = :question_id AND answer.team_id = :team_id;");
