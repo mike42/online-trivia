@@ -1,0 +1,7 @@
+# Rewrite rules for smartphone-trivia
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+
+# Handle everything else
+RewriteRule ^(.*)$ /trivia/index.php?p=$1 [PT,L,QSA]
