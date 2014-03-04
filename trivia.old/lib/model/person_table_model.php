@@ -24,26 +24,11 @@ class person_table_model {
 	public $team;
 
 	/**
-	 * Initialise and load related tables
-	 */
-	public static function init() {
-		core::loadClass("database");
-		core::loadClass("round_model");
-		core::loadClass("person_model");
-		core::loadClass("team_model");
-	}
-
-	/**
 	 * Construct new person_table from field list
 	 * 
 	 * @return array
 	 */
 	public function __construct(array $fields = array()) {
-/* Initialise everything as blank to avoid tripping up the permissions fitlers */
-		$this -> round_id = '';
-		$this -> person_id = '';
-		$this -> team_id = '';
-
 		if(isset($fields['person_table.round_id'])) {
 			$this -> set_round_id($fields['person_table.round_id']);
 		}
@@ -80,21 +65,7 @@ class person_table_model {
 	 * @param string $role The user role to use
 	 */
 	public function to_array_filtered($role = "anon") {
-		if(core::$permission[$role]['person_table']['read'] === false) {
-			return false;
-		}
-		$values = array();
-		$everything = $this -> to_array();
-		foreach(core::$permission[$role]['person_table']['read'] as $field) {
-			if(!isset($everything[$field])) {
-				throw new Exception("Check permissions: '$field' is not a real field in person_table");
-			}
-			$values[$field] = $everything[$field];
-		}
-		$values['round'] = $this -> round -> to_array_filtered($role);
-		$values['person'] = $this -> person -> to_array_filtered($role);
-		$values['team'] = $this -> team -> to_array_filtered($role);
-		return $values;
+		// TODO: Insert code for person_table permission-check
 	}
 
 	/**
@@ -279,30 +250,6 @@ class person_table_model {
 	}
 
 	/**
-	 * List all rows
-	 * 
-	 * @param int $start Row to begin from. Default 0 (begin from start)
-	 * @param int $limit Maximum number of rows to retrieve. Default -1 (no limit)
-	 */
-	public static function list_all($start = 0, $limit = -1) {
-		$ls = "";
-		$start = (int)$start;
-		$limit = (int)$limit;
-		if($start > 0 && $limit > 0) {
-			$ls = " LIMIT $start, " . ($start + $limit);
-		}
-		$sth = database::$dbh -> prepare("SELECT person_table.round_id, person_table.person_id, person_table.team_id, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, person.person_id, person.person_name, person.game_id, team.team_id, team.team_code, team.game_id, team.team_name, game.game_id, game.game_name, game.game_state, game.game_code FROM person_table JOIN round ON person_table.round_id = round.round_id JOIN person ON person_table.person_id = person.person_id JOIN team ON person_table.team_id = team.team_id JOIN game ON round.game_id = game.game_id" . $ls . ";");
-		$sth -> execute();
-		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
-		$ret = array();
-		foreach($rows as $row) {
-			$assoc = self::row_to_assoc($row);
-			$ret[] = new person_table_model($assoc);
-		}
-		return $ret;
-	}
-
-	/**
 	 * List rows by person_id_fk1 index
 	 * 
 	 * @param int $start Row to begin from. Default 0 (begin from start)
@@ -348,6 +295,13 @@ class person_table_model {
 			$ret[] = new person_table_model($assoc);
 		}
 		return $ret;
+	}
+	
+	public static function count_by_round($round_id) {
+		$sth = database::$dbh -> prepare("SELECT team_id, count(person_id) as people FROM person_table WHERE round_id = :round_id GROUP BY team_id;");
+		$sth -> execute(array('round_id' => $round_id));
+		$rows = $sth -> fetchAll(PDO::FETCH_ASSOC);
+		return $rows;
 	}
 }
 ?>

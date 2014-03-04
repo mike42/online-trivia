@@ -35,29 +35,11 @@ class round_model {
 	public $list_question;
 
 	/**
-	 * Initialise and load related tables
-	 */
-	public static function init() {
-		core::loadClass("database");
-		core::loadClass("game_model");
-
-		/* Child tables */
-		core::loadClass("question_model");
-	}
-
-	/**
 	 * Construct new round from field list
 	 * 
 	 * @return array
 	 */
 	public function __construct(array $fields = array()) {
-/* Initialise everything as blank to avoid tripping up the permissions fitlers */
-		$this -> round_id = '';
-		$this -> name = '';
-		$this -> game_id = '';
-		$this -> round_sortkey = '';
-		$this -> round_state = '';
-
 		if(isset($fields['round.round_id'])) {
 			$this -> set_round_id($fields['round.round_id']);
 		}
@@ -76,7 +58,6 @@ class round_model {
 
 		$this -> model_variables_changed = array();
 		$this -> game = new game_model($fields);
-		$this -> list_question = array();
 	}
 
 	/**
@@ -101,25 +82,7 @@ class round_model {
 	 * @param string $role The user role to use
 	 */
 	public function to_array_filtered($role = "anon") {
-		if(core::$permission[$role]['round']['read'] === false) {
-			return false;
-		}
-		$values = array();
-		$everything = $this -> to_array();
-		foreach(core::$permission[$role]['round']['read'] as $field) {
-			if(!isset($everything[$field])) {
-				throw new Exception("Check permissions: '$field' is not a real field in round");
-			}
-			$values[$field] = $everything[$field];
-		}
-		$values['game'] = $this -> game -> to_array_filtered($role);
-
-		/* Add filtered versions of everything that's been loaded */
-		$values['question'] = array();
-		foreach($this -> list_question as $question) {
-			$values['question'][] = $question -> to_array_filtered($role);
-		}
-		return $values;
+		// TODO: Insert code for round permission-check
 	}
 
 	/**
@@ -297,7 +260,7 @@ class round_model {
 	 * Add new round
 	 */
 	public function insert() {
-		if(count($this -> model_variables_set) == 0) {
+		if(count($this -> model_variables_changed) == 0) {
 			throw new Exception("No fields have been set!");
 		}
 
@@ -316,7 +279,6 @@ class round_model {
 		/* Execute query */
 		$sth = database::$dbh -> prepare("INSERT INTO round ($fields) VALUES ($vals);");
 		$sth -> execute($data);
-		$this -> set_round_id(database::$dbh->lastInsertId());
 	}
 
 	/**
@@ -365,30 +327,6 @@ class round_model {
 		}
 		$assoc = self::row_to_assoc($row);
 		return new round_model($assoc);
-	}
-
-	/**
-	 * List all rows
-	 * 
-	 * @param int $start Row to begin from. Default 0 (begin from start)
-	 * @param int $limit Maximum number of rows to retrieve. Default -1 (no limit)
-	 */
-	public static function list_all($start = 0, $limit = -1) {
-		$ls = "";
-		$start = (int)$start;
-		$limit = (int)$limit;
-		if($start > 0 && $limit > 0) {
-			$ls = " LIMIT $start, " . ($start + $limit);
-		}
-		$sth = database::$dbh -> prepare("SELECT round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM round JOIN game ON round.game_id = game.game_id" . $ls . ";");
-		$sth -> execute();
-		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
-		$ret = array();
-		foreach($rows as $row) {
-			$assoc = self::row_to_assoc($row);
-			$ret[] = new round_model($assoc);
-		}
-		return $ret;
 	}
 
 	/**

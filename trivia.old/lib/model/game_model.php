@@ -29,29 +29,11 @@ class game_model {
 	public $list_person;
 
 	/**
-	 * Initialise and load related tables
-	 */
-	public static function init() {
-		core::loadClass("database");
-
-		/* Child tables */
-		core::loadClass("team_model");
-		core::loadClass("round_model");
-		core::loadClass("person_model");
-	}
-
-	/**
 	 * Construct new game from field list
 	 * 
 	 * @return array
 	 */
 	public function __construct(array $fields = array()) {
-/* Initialise everything as blank to avoid tripping up the permissions fitlers */
-		$this -> game_id = '';
-		$this -> game_name = '';
-		$this -> game_state = '';
-		$this -> game_code = '';
-
 		if(isset($fields['game.game_id'])) {
 			$this -> set_game_id($fields['game.game_id']);
 		}
@@ -66,9 +48,6 @@ class game_model {
 		}
 
 		$this -> model_variables_changed = array();
-		$this -> list_team = array();
-		$this -> list_round = array();
-		$this -> list_person = array();
 	}
 
 	/**
@@ -92,32 +71,7 @@ class game_model {
 	 * @param string $role The user role to use
 	 */
 	public function to_array_filtered($role = "anon") {
-		if(core::$permission[$role]['game']['read'] === false) {
-			return false;
-		}
-		$values = array();
-		$everything = $this -> to_array();
-		foreach(core::$permission[$role]['game']['read'] as $field) {
-			if(!isset($everything[$field])) {
-				throw new Exception("Check permissions: '$field' is not a real field in game");
-			}
-			$values[$field] = $everything[$field];
-		}
-
-		/* Add filtered versions of everything that's been loaded */
-		$values['team'] = array();
-		$values['round'] = array();
-		$values['person'] = array();
-		foreach($this -> list_team as $team) {
-			$values['team'][] = $team -> to_array_filtered($role);
-		}
-		foreach($this -> list_round as $round) {
-			$values['round'][] = $round -> to_array_filtered($role);
-		}
-		foreach($this -> list_person as $person) {
-			$values['person'][] = $person -> to_array_filtered($role);
-		}
-		return $values;
+		// TODO: Insert code for game permission-check
 	}
 
 	/**
@@ -264,7 +218,7 @@ class game_model {
 	 * Add new game
 	 */
 	public function insert() {
-		if(count($this -> model_variables_set) == 0) {
+		if(count($this -> model_variables_changed) == 0) {
 			throw new Exception("No fields have been set!");
 		}
 
@@ -283,7 +237,6 @@ class game_model {
 		/* Execute query */
 		$sth = database::$dbh -> prepare("INSERT INTO game ($fields) VALUES ($vals);");
 		$sth -> execute($data);
-		$this -> set_game_id(database::$dbh->lastInsertId());
 	}
 
 	/**
@@ -355,29 +308,12 @@ class game_model {
 		$assoc = self::row_to_assoc($row);
 		return new game_model($assoc);
 	}
-
-	/**
-	 * List all rows
-	 * 
-	 * @param int $start Row to begin from. Default 0 (begin from start)
-	 * @param int $limit Maximum number of rows to retrieve. Default -1 (no limit)
-	 */
-	public static function list_all($start = 0, $limit = -1) {
-		$ls = "";
-		$start = (int)$start;
-		$limit = (int)$limit;
-		if($start > 0 && $limit > 0) {
-			$ls = " LIMIT $start, " . ($start + $limit);
-		}
-		$sth = database::$dbh -> prepare("SELECT game.game_id, game.game_name, game.game_state, game.game_code FROM game " . $ls . ";");
-		$sth -> execute();
-		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
-		$ret = array();
-		foreach($rows as $row) {
-			$assoc = self::row_to_assoc($row);
-			$ret[] = new game_model($assoc);
-		}
-		return $ret;
+	
+	public function reset() {
+		$sth = database::$dbh -> prepare("DELETE answer FROM answer JOIN question ON answer.question_id = question.question_id JOIN round ON round.round_id = question.round_id WHERE round.game_id = :game_id;");
+		$sth -> execute(array('game_id' => $this -> get_game_id()));
+		$sth = database::$dbh -> prepare("DELETE person_table FROM person_table JOIN person ON person.person_id = person_table.person_id JOIN game ON person.game_id = game.game_id WHERE game.game_id = :game_id;");
+		$sth -> execute(array('game_id' => $this -> get_game_id()));
 	}
 }
 ?>

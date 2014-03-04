@@ -29,20 +29,6 @@ class team_model {
 	/* Child tables */
 	public $list_answer;
 	public $list_person_table;
-	public $list_team_round;
-
-	/**
-	 * Initialise and load related tables
-	 */
-	public static function init() {
-		core::loadClass("database");
-		core::loadClass("game_model");
-
-		/* Child tables */
-		core::loadClass("answer_model");
-		core::loadClass("person_table_model");
-		core::loadClass("team_round_model");
-	}
 
 	/**
 	 * Construct new team from field list
@@ -50,12 +36,6 @@ class team_model {
 	 * @return array
 	 */
 	public function __construct(array $fields = array()) {
-/* Initialise everything as blank to avoid tripping up the permissions fitlers */
-		$this -> team_id = '';
-		$this -> team_code = '';
-		$this -> game_id = '';
-		$this -> team_name = '';
-
 		if(isset($fields['team.team_id'])) {
 			$this -> set_team_id($fields['team.team_id']);
 		}
@@ -71,9 +51,6 @@ class team_model {
 
 		$this -> model_variables_changed = array();
 		$this -> game = new game_model($fields);
-		$this -> list_answer = array();
-		$this -> list_person_table = array();
-		$this -> list_team_round = array();
 	}
 
 	/**
@@ -97,33 +74,7 @@ class team_model {
 	 * @param string $role The user role to use
 	 */
 	public function to_array_filtered($role = "anon") {
-		if(core::$permission[$role]['team']['read'] === false) {
-			return false;
-		}
-		$values = array();
-		$everything = $this -> to_array();
-		foreach(core::$permission[$role]['team']['read'] as $field) {
-			if(!isset($everything[$field])) {
-				throw new Exception("Check permissions: '$field' is not a real field in team");
-			}
-			$values[$field] = $everything[$field];
-		}
-		$values['game'] = $this -> game -> to_array_filtered($role);
-
-		/* Add filtered versions of everything that's been loaded */
-		$values['answer'] = array();
-		$values['person_table'] = array();
-		$values['team_round'] = array();
-		foreach($this -> list_answer as $answer) {
-			$values['answer'][] = $answer -> to_array_filtered($role);
-		}
-		foreach($this -> list_person_table as $person_table) {
-			$values['person_table'][] = $person_table -> to_array_filtered($role);
-		}
-		foreach($this -> list_team_round as $team_round) {
-			$values['team_round'][] = $team_round -> to_array_filtered($role);
-		}
-		return $values;
+		// TODO: Insert code for team permission-check
 	}
 
 	/**
@@ -274,7 +225,7 @@ class team_model {
 	 * Add new team
 	 */
 	public function insert() {
-		if(count($this -> model_variables_set) == 0) {
+		if(count($this -> model_variables_changed) == 0) {
 			throw new Exception("No fields have been set!");
 		}
 
@@ -293,7 +244,6 @@ class team_model {
 		/* Execute query */
 		$sth = database::$dbh -> prepare("INSERT INTO team ($fields) VALUES ($vals);");
 		$sth -> execute($data);
-		$this -> set_team_id(database::$dbh->lastInsertId());
 	}
 
 	/**
@@ -328,17 +278,6 @@ class team_model {
 	}
 
 	/**
-	 * List associated rows from team_round table
-	 * 
-	 * @param int $start Row to begin from. Default 0 (begin from start)
-	 * @param int $limit Maximum number of rows to retrieve. Default -1 (no limit)
-	 */
-	public function populate_list_team_round($start = 0, $limit = -1) {
-		$team_team_id = $this -> get_team_id();
-		$this -> list_team_round = team_round_model::list_by_fk_team_round_team1_idx($team_team_id, $start, $limit);
-	}
-
-	/**
 	 * Retrieve by primary key
 	 */
 	public static function get($team_id) {
@@ -364,30 +303,6 @@ class team_model {
 		}
 		$assoc = self::row_to_assoc($row);
 		return new team_model($assoc);
-	}
-
-	/**
-	 * List all rows
-	 * 
-	 * @param int $start Row to begin from. Default 0 (begin from start)
-	 * @param int $limit Maximum number of rows to retrieve. Default -1 (no limit)
-	 */
-	public static function list_all($start = 0, $limit = -1) {
-		$ls = "";
-		$start = (int)$start;
-		$limit = (int)$limit;
-		if($start > 0 && $limit > 0) {
-			$ls = " LIMIT $start, " . ($start + $limit);
-		}
-		$sth = database::$dbh -> prepare("SELECT team.team_id, team.team_code, team.game_id, team.team_name, game.game_id, game.game_name, game.game_state, game.game_code FROM team JOIN game ON team.game_id = game.game_id" . $ls . ";");
-		$sth -> execute();
-		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
-		$ret = array();
-		foreach($rows as $row) {
-			$assoc = self::row_to_assoc($row);
-			$ret[] = new team_model($assoc);
-		}
-		return $ret;
 	}
 
 	/**

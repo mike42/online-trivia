@@ -35,29 +35,11 @@ class question_model {
 	public $list_answer;
 
 	/**
-	 * Initialise and load related tables
-	 */
-	public static function init() {
-		core::loadClass("database");
-		core::loadClass("round_model");
-
-		/* Child tables */
-		core::loadClass("answer_model");
-	}
-
-	/**
 	 * Construct new question from field list
 	 * 
 	 * @return array
 	 */
 	public function __construct(array $fields = array()) {
-/* Initialise everything as blank to avoid tripping up the permissions fitlers */
-		$this -> question_id = '';
-		$this -> round_id = '';
-		$this -> question_text = '';
-		$this -> question_sortkey = '';
-		$this -> question_state = '';
-
 		if(isset($fields['question.question_id'])) {
 			$this -> set_question_id($fields['question.question_id']);
 		}
@@ -76,7 +58,6 @@ class question_model {
 
 		$this -> model_variables_changed = array();
 		$this -> round = new round_model($fields);
-		$this -> list_answer = array();
 	}
 
 	/**
@@ -101,25 +82,7 @@ class question_model {
 	 * @param string $role The user role to use
 	 */
 	public function to_array_filtered($role = "anon") {
-		if(core::$permission[$role]['question']['read'] === false) {
-			return false;
-		}
-		$values = array();
-		$everything = $this -> to_array();
-		foreach(core::$permission[$role]['question']['read'] as $field) {
-			if(!isset($everything[$field])) {
-				throw new Exception("Check permissions: '$field' is not a real field in question");
-			}
-			$values[$field] = $everything[$field];
-		}
-		$values['round'] = $this -> round -> to_array_filtered($role);
-
-		/* Add filtered versions of everything that's been loaded */
-		$values['answer'] = array();
-		foreach($this -> list_answer as $answer) {
-			$values['answer'][] = $answer -> to_array_filtered($role);
-		}
-		return $values;
+		// TODO: Insert code for question permission-check
 	}
 
 	/**
@@ -302,7 +265,7 @@ class question_model {
 	 * Add new question
 	 */
 	public function insert() {
-		if(count($this -> model_variables_set) == 0) {
+		if(count($this -> model_variables_changed) == 0) {
 			throw new Exception("No fields have been set!");
 		}
 
@@ -321,7 +284,6 @@ class question_model {
 		/* Execute query */
 		$sth = database::$dbh -> prepare("INSERT INTO question ($fields) VALUES ($vals);");
 		$sth -> execute($data);
-		$this -> set_question_id(database::$dbh->lastInsertId());
 	}
 
 	/**
@@ -373,30 +335,6 @@ class question_model {
 	}
 
 	/**
-	 * List all rows
-	 * 
-	 * @param int $start Row to begin from. Default 0 (begin from start)
-	 * @param int $limit Maximum number of rows to retrieve. Default -1 (no limit)
-	 */
-	public static function list_all($start = 0, $limit = -1) {
-		$ls = "";
-		$start = (int)$start;
-		$limit = (int)$limit;
-		if($start > 0 && $limit > 0) {
-			$ls = " LIMIT $start, " . ($start + $limit);
-		}
-		$sth = database::$dbh -> prepare("SELECT question.question_id, question.round_id, question.question_text, question.question_sortkey, question.question_state, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM question JOIN round ON question.round_id = round.round_id JOIN game ON round.game_id = game.game_id" . $ls . ";");
-		$sth -> execute();
-		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
-		$ret = array();
-		foreach($rows as $row) {
-			$assoc = self::row_to_assoc($row);
-			$ret[] = new question_model($assoc);
-		}
-		return $ret;
-	}
-
-	/**
 	 * List rows by round_id index
 	 * 
 	 * @param int $start Row to begin from. Default 0 (begin from start)
@@ -409,7 +347,7 @@ class question_model {
 		if($start > 0 && $limit > 0) {
 			$ls = " LIMIT $start, " . ($start + $limit);
 		}
-		$sth = database::$dbh -> prepare("SELECT question.question_id, question.round_id, question.question_text, question.question_sortkey, question.question_state, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM question JOIN round ON question.round_id = round.round_id JOIN game ON round.game_id = game.game_id WHERE question.round_id = :round_id" . $ls . ";");
+		$sth = database::$dbh -> prepare("SELECT question.question_id, question.round_id, question.question_text, question.question_sortkey, question.question_state, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM question JOIN round ON question.round_id = round.round_id JOIN game ON round.game_id = game.game_id WHERE question.round_id = :round_id ORDER BY question.question_sortkey" . $ls . ";");
 		$sth -> execute(array('round_id' => $round_id));
 		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
 		$ret = array();

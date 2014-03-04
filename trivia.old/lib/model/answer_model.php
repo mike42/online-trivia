@@ -33,27 +33,11 @@ class answer_model {
 	public $team;
 
 	/**
-	 * Initialise and load related tables
-	 */
-	public static function init() {
-		core::loadClass("database");
-		core::loadClass("question_model");
-		core::loadClass("team_model");
-	}
-
-	/**
 	 * Construct new answer from field list
 	 * 
 	 * @return array
 	 */
 	public function __construct(array $fields = array()) {
-/* Initialise everything as blank to avoid tripping up the permissions fitlers */
-		$this -> question_id = '';
-		$this -> team_id = '';
-		$this -> answer_text = '';
-		$this -> answer_is_correct = '';
-		$this -> answer_time = '';
-
 		if(isset($fields['answer.question_id'])) {
 			$this -> set_question_id($fields['answer.question_id']);
 		}
@@ -97,20 +81,7 @@ class answer_model {
 	 * @param string $role The user role to use
 	 */
 	public function to_array_filtered($role = "anon") {
-		if(core::$permission[$role]['answer']['read'] === false) {
-			return false;
-		}
-		$values = array();
-		$everything = $this -> to_array();
-		foreach(core::$permission[$role]['answer']['read'] as $field) {
-			if(!isset($everything[$field])) {
-				throw new Exception("Check permissions: '$field' is not a real field in answer");
-			}
-			$values[$field] = $everything[$field];
-		}
-		$values['question'] = $this -> question -> to_array_filtered($role);
-		$values['team'] = $this -> team -> to_array_filtered($role);
-		return $values;
+		// TODO: Insert code for answer permission-check
 	}
 
 	/**
@@ -301,7 +272,7 @@ class answer_model {
 	 * Add new answer
 	 */
 	public function insert() {
-		if(count($this -> model_variables_set) == 0) {
+		if(count($this -> model_variables_changed) == 0) {
 			throw new Exception("No fields have been set!");
 		}
 
@@ -344,30 +315,6 @@ class answer_model {
 		}
 		$assoc = self::row_to_assoc($row);
 		return new answer_model($assoc);
-	}
-
-	/**
-	 * List all rows
-	 * 
-	 * @param int $start Row to begin from. Default 0 (begin from start)
-	 * @param int $limit Maximum number of rows to retrieve. Default -1 (no limit)
-	 */
-	public static function list_all($start = 0, $limit = -1) {
-		$ls = "";
-		$start = (int)$start;
-		$limit = (int)$limit;
-		if($start > 0 && $limit > 0) {
-			$ls = " LIMIT $start, " . ($start + $limit);
-		}
-		$sth = database::$dbh -> prepare("SELECT answer.question_id, answer.team_id, answer.answer_text, answer.answer_is_correct, answer.answer_time, question.question_id, question.round_id, question.question_text, question.question_sortkey, question.question_state, team.team_id, team.team_code, team.game_id, team.team_name, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM answer JOIN question ON answer.question_id = question.question_id JOIN team ON answer.team_id = team.team_id JOIN round ON question.round_id = round.round_id JOIN game ON team.game_id = game.game_id" . $ls . ";");
-		$sth -> execute();
-		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
-		$ret = array();
-		foreach($rows as $row) {
-			$assoc = self::row_to_assoc($row);
-			$ret[] = new answer_model($assoc);
-		}
-		return $ret;
 	}
 
 	/**
@@ -416,6 +363,24 @@ class answer_model {
 			$ret[] = new answer_model($assoc);
 		}
 		return $ret;
+	}
+	
+	public static function list_unmarked() {
+		$sth = database::$dbh -> prepare("SELECT answer.question_id, answer.team_id, answer.answer_text, answer.answer_is_correct, answer.answer_time, question.question_id, question.round_id, question.question_text, question.question_sortkey, question.question_state, team.team_id, team.team_code, team.game_id, team.team_name, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM answer JOIN question ON answer.question_id = question.question_id JOIN team ON answer.team_id = team.team_id JOIN round ON question.round_id = round.round_id JOIN game ON team.game_id = game.game_id WHERE answer.answer_is_correct = 0 ORDER BY round.round_sortkey, question.question_sortkey");
+		$sth -> execute(array());
+		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
+		$ret = array();
+		foreach($rows as $row) {
+			$assoc = self::row_to_assoc($row);
+			$ret[] = new answer_model($assoc);
+		}
+		return $ret;
+	}
+	
+	public static function leaderboard($game_id) {
+		$sth = database::$dbh -> prepare("SELECT person.person_id, person.person_name, count(question.question_id) AS score FROM person RIGHT JOIN person_table ON person_table.person_id = person.person_id RIGHT JOIN question ON question.round_id = person_table.round_id JOIN answer ON answer.question_id = question.question_id AND answer.team_id = person_table.team_id WHERE answer_is_correct = 2 AND person.game_id = :game_id GROUP BY person.person_id, person.person_name ORDER BY score DESC");
+		$sth -> execute(array('game_id' => $game_id));
+		return $sth -> fetchAll(PDO::FETCH_ASSOC);
 	}
 }
 ?>

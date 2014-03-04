@@ -25,27 +25,11 @@ class person_model {
 	public $list_person_table;
 
 	/**
-	 * Initialise and load related tables
-	 */
-	public static function init() {
-		core::loadClass("database");
-		core::loadClass("game_model");
-
-		/* Child tables */
-		core::loadClass("person_table_model");
-	}
-
-	/**
 	 * Construct new person from field list
 	 * 
 	 * @return array
 	 */
 	public function __construct(array $fields = array()) {
-/* Initialise everything as blank to avoid tripping up the permissions fitlers */
-		$this -> person_id = '';
-		$this -> person_name = '';
-		$this -> game_id = '';
-
 		if(isset($fields['person.person_id'])) {
 			$this -> set_person_id($fields['person.person_id']);
 		}
@@ -58,7 +42,6 @@ class person_model {
 
 		$this -> model_variables_changed = array();
 		$this -> game = new game_model($fields);
-		$this -> list_person_table = array();
 	}
 
 	/**
@@ -81,25 +64,7 @@ class person_model {
 	 * @param string $role The user role to use
 	 */
 	public function to_array_filtered($role = "anon") {
-		if(core::$permission[$role]['person']['read'] === false) {
-			return false;
-		}
-		$values = array();
-		$everything = $this -> to_array();
-		foreach(core::$permission[$role]['person']['read'] as $field) {
-			if(!isset($everything[$field])) {
-				throw new Exception("Check permissions: '$field' is not a real field in person");
-			}
-			$values[$field] = $everything[$field];
-		}
-		$values['game'] = $this -> game -> to_array_filtered($role);
-
-		/* Add filtered versions of everything that's been loaded */
-		$values['person_table'] = array();
-		foreach($this -> list_person_table as $person_table) {
-			$values['person_table'][] = $person_table -> to_array_filtered($role);
-		}
-		return $values;
+		// TODO: Insert code for person permission-check
 	}
 
 	/**
@@ -223,7 +188,7 @@ class person_model {
 	 * Add new person
 	 */
 	public function insert() {
-		if(count($this -> model_variables_set) == 0) {
+		if(count($this -> model_variables_changed) == 0) {
 			throw new Exception("No fields have been set!");
 		}
 
@@ -242,7 +207,6 @@ class person_model {
 		/* Execute query */
 		$sth = database::$dbh -> prepare("INSERT INTO person ($fields) VALUES ($vals);");
 		$sth -> execute($data);
-		$this -> set_person_id(database::$dbh->lastInsertId());
 	}
 
 	/**
@@ -277,30 +241,6 @@ class person_model {
 		}
 		$assoc = self::row_to_assoc($row);
 		return new person_model($assoc);
-	}
-
-	/**
-	 * List all rows
-	 * 
-	 * @param int $start Row to begin from. Default 0 (begin from start)
-	 * @param int $limit Maximum number of rows to retrieve. Default -1 (no limit)
-	 */
-	public static function list_all($start = 0, $limit = -1) {
-		$ls = "";
-		$start = (int)$start;
-		$limit = (int)$limit;
-		if($start > 0 && $limit > 0) {
-			$ls = " LIMIT $start, " . ($start + $limit);
-		}
-		$sth = database::$dbh -> prepare("SELECT person.person_id, person.person_name, person.game_id, game.game_id, game.game_name, game.game_state, game.game_code FROM person JOIN game ON person.game_id = game.game_id" . $ls . ";");
-		$sth -> execute();
-		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
-		$ret = array();
-		foreach($rows as $row) {
-			$assoc = self::row_to_assoc($row);
-			$ret[] = new person_model($assoc);
-		}
-		return $ret;
 	}
 
 	/**

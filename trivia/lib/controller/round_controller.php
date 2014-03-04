@@ -1,71 +1,127 @@
 <?php
 class round_controller {
 	public static function init() {
-		core::loadClass("game_model");
+		core::loadClass("session");
 		core::loadClass("round_model");
-		core::loadClass("team_model");
-		core::loadClass("person_model");
-		core::loadClass("answer_model");
-		core::loadClass("question_model");
-		core::loadClass("person_table_model");
 	}
 
 	public static function create() {
-	}
+		/* Check permission */
+		$role = session::getRole();
+		if(!isset(core::$permission[$role]['round']['create']) || core::$permission[$role]['round']['create'] != true) {
+			return array('error' => 'You do not have permission to do that', 'code' => '403');
+		}
 
-	public static function read() {
-	}
-
-	public static function update() {
-	}
-
-	public static function delete() {
-	}
-	
-	public static function teams($round_id) {
-		$team = array();
-		$round = round_model::get($round_id);
-		if($round === false) {
-			return array('error' => "No such round");
-		}
-		$round -> game -> populate_list_team();
-		foreach($round -> game -> list_team as $t) {
-			$team[$t -> get_team_id()] = 0; // Make sure all teams are included
-		}
-		
-		// teams
-		$pt = person_table_model::count_by_round($round_id);
-		foreach($pt as $t) {
-			$team[$t['team_id']] = $t['people'];
-		}
-		
-		return array($team);
-	}
-
-	public static function responses($round_id, $question_id) {
-		$team = array();
-		$round = round_model::get($round_id);
-		if($round === false) {
-			return array('error' => "No such round");
-		}
-		$round -> game -> populate_list_team();
-		foreach($round -> game -> list_team as $t) {
-			$team[$t -> get_team_id()] = 0; // Make sure all teams are included
-		}
-	
-		// responses
-		$r = answer_model::list_by_question_id($question_id);
-		foreach($r as $t) {
-			if(isset($team[$t -> get_team_id()])) {
-				$team[$t -> get_team_id()] = '1';
+		/* Find fields to insert */
+		$fields = array('round_id', 'name', 'game_id', 'round_sortkey', 'round_state');
+		$init = array();
+		$received = json_decode(file_get_contents('php://input'), true, 2);
+		foreach($fields as $field) {
+			if(isset($received[$field])) {
+				$init["round.$field"] = $received[$field];
 			}
 		}
-		return array($team);
-		
+			$round = new round_model($init);
+
+		/* Check parent tables */
+		if(!game_model::get($round -> get_game_id())) {
+			return array('error' => 'round is invalid because related game does not exist', 'code' => '400');
+		}
+
+		/* Insert new row */
+		try {
+			$round -> insert();
+			return $round -> to_array_filtered($role);
+		} catch(Exception $e) {
+			return array('error' => 'Failed to add to database', 'code' => '500');
+		}
 	}
-	
-	private static function blankTeams($round_id) {
-	
+
+	public static function read($round_id) {
+		/* Check permission */
+		$role = session::getRole();
+		if(!isset(core::$permission[$role]['round']['read']) || count(core::$permission[$role]['round']['read']) == 0) {
+			return array('error' => 'You do not have permission to do that', 'code' => '403');
+		}
+
+		/* Load round */
+		$round = round_model::get($round_id);
+		if(!$round) {
+			return array('error' => 'round not found', 'code' => '404');
+		}
+		// $round -> populate_list_question();
+		return $round -> to_array_filtered($role);
+	}
+
+	public static function update($round_id) {
+		/* Check permission */
+		$role = session::getRole();
+		if(!isset(core::$permission[$role]['round']['update']) || count(core::$permission[$role]['round']['update']) == 0) {
+			return array('error' => 'You do not have permission to do that', 'code' => '403');
+		}
+
+		/* Load round */
+		$round = round_model::get($round_id);
+		if(!$round) {
+			return array('error' => 'round not found', 'code' => '404');
+		}
+
+		/* Find fields to update */
+		$update = false;
+		$received = json_decode(file_get_contents('php://input'), true);
+		if(isset($received['name']) && in_array('name', core::$permission[$role]['round']['update'])) {
+			$round -> set_name($received['name']);
+		}
+		if(isset($received['game_id']) && in_array('game_id', core::$permission[$role]['round']['update'])) {
+			$round -> set_game_id($received['game_id']);
+		}
+		if(isset($received['round_sortkey']) && in_array('round_sortkey', core::$permission[$role]['round']['update'])) {
+			$round -> set_round_sortkey($received['round_sortkey']);
+		}
+		if(isset($received['round_state']) && in_array('round_state', core::$permission[$role]['round']['update'])) {
+			$round -> set_round_state($received['round_state']);
+		}
+
+		/* Check parent tables */
+		if(!game_model::get($round -> get_game_id())) {
+			return array('error' => 'round is invalid because related game does not exist', 'code' => '400');
+		}
+
+		/* Update the row */
+		try {
+			$round -> update();
+			return $round -> to_array_filtered($role);
+		} catch(Exception $e) {
+			return array('error' => 'Failed to update row', 'code' => '500');
+		}
+	}
+
+	public static function delete($round_id) {
+		/* Check permission */
+		$role = session::getRole();
+		if(!isset(core::$permission[$role]['round']['delete']) || core::$permission[$role]['round']['delete'] != true) {
+			return array('error' => 'You do not have permission to do that', 'code' => '403');
+		}
+
+		/* Load round */
+		$round = round_model::get($round_id);
+		if(!$round) {
+			return array('error' => 'round not found', 'code' => '404');
+		}
+
+		/* Check for child rows */
+		$round -> populate_list_question(0, 1);
+		if(count($round -> list_question) > 0) {
+			return array('error' => 'Cannot delete round because of a related question entry', 'code' => '400');
+		}
+
+		/* Delete it */
+		try {
+			$round -> delete();
+			return array('success' => 'yes');
+		} catch(Exception $e) {
+			return array('error' => 'Failed to delete', 'code' => '500');
+		}
 	}
 }
 ?>

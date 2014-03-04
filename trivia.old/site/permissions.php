@@ -93,17 +93,6 @@ $permission['user'] = array(
 			'round_id',
 			'person_id',
 			'team_id'),
-		'delete' => true),
-	'team_round' => array(
-		'create' => true,
-		'read' => array(
-			'round_round_id',
-			'team_team_id',
-			'bonus_points'),
-		'update' => array(
-			'round_round_id',
-			'team_team_id',
-			'bonus_points'),
 		'delete' => true));
 $permission['admin'] = array(
 	'game' => array(
@@ -198,15 +187,4 @@ $permission['admin'] = array(
 			'round_id',
 			'person_id',
 			'team_id'),
-		'delete' => true),
-	'team_round' => array(
-		'create' => true,
-		'read' => array(
-			'round_round_id',
-			'team_team_id',
-			'bonus_points'),
-		'update' => array(
-			'round_round_id',
-			'team_team_id',
-			'bonus_points'),
 		'delete' => true));
