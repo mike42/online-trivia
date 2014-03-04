@@ -147,6 +147,28 @@ CREATE TABLE IF NOT EXISTS `smartphone_trivia`.`person_table` (
 ENGINE = InnoDB;
 
 
+-- -----------------------------------------------------
+-- Table `smartphone_trivia`.`team_round`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `smartphone_trivia`.`team_round` (
+  `round_round_id` INT NOT NULL,
+  `team_team_id` INT NOT NULL,
+  `bonus_points` INT NULL,
+  PRIMARY KEY (`round_round_id`, `team_team_id`),
+  INDEX `fk_team_round_team1_idx` (`team_team_id` ASC),
+  CONSTRAINT `fk_team_round_round1`
+    FOREIGN KEY (`round_round_id`)
+    REFERENCES `smartphone_trivia`.`round` (`round_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_team_round_team1`
+    FOREIGN KEY (`team_team_id`)
+    REFERENCES `smartphone_trivia`.`team` (`team_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
