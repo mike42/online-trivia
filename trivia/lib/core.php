@@ -142,5 +142,9 @@ class core {
 		include(dirname(__FILE__) . "/../site/permissions.php");
 		self::$permission = $permission;
 	}
+	
+	public static function showHTML($data) {
+		include(dirname(__FILE__) . "/view/html/" . $data['layout'] . ".inc");
+	}
 }
 core::init();
