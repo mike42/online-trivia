@@ -13,3 +13,21 @@ This web app facilitates paperless trivia games for as many teams as you can fit
 Note on game variant
 --------------------
 This is an 'individuals trivia' game, so people are expected to change groups each round (you will need to organise how you do this!). The team as a whole does not appear on the leader-board: each individual in a team is credited with the number of points that the team earned in that round.
+
+Setup instructions
+------------------
+Clone the repo.
+
+Import `trivia.sql` into a new database.
+
+Symlink to `trivia` from your web root.
+
+Add database connection details to the following code snippet and save to `trivia/site/config.php`
+```php
+<?php
+/* Database connection options */
+$config['database']['user'] = "";
+$config['database']['pass'] = "";
+$config['database']['host'] = "localhost";
+$config['database']['db'] = "";
+```
