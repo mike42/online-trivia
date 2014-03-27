@@ -1,5 +1,5 @@
 /* game */
-game_model = Backbone.Model.extend({
+var game_model = Backbone.Model.extend({
 	urlRoot: '/trivia/api/game',
 	idAttribute: 'game_id',
 	defaults: {
@@ -8,9 +8,13 @@ game_model = Backbone.Model.extend({
 		game_code: ''
 	}
 });
+var game_collection = Backbone.Collection.extend({
+	url : '/dl/api/game/list_all/',
+	model : game_model
+});
 
 /* team */
-team_model = Backbone.Model.extend({
+var team_model = Backbone.Model.extend({
 	urlRoot: '/trivia/api/team',
 	idAttribute: 'team_id',
 	defaults: {
@@ -19,9 +23,13 @@ team_model = Backbone.Model.extend({
 		team_name: ''
 	}
 });
+var team_collection = Backbone.Collection.extend({
+	url : '/dl/api/team/list_all/',
+	model : team_model
+});
 
 /* round */
-round_model = Backbone.Model.extend({
+var round_model = Backbone.Model.extend({
 	urlRoot: '/trivia/api/round',
 	idAttribute: 'round_id',
 	defaults: {
@@ -31,26 +39,39 @@ round_model = Backbone.Model.extend({
 		round_state: 0
 	}
 });
+var round_collection = Backbone.Collection.extend({
+	url : '/dl/api/round/list_all/',
+	model : round_model
+});
 
 /* question */
-question_model = Backbone.Model.extend({
+var question_model = Backbone.Model.extend({
 	urlRoot: '/trivia/api/question',
 	idAttribute: 'question_id',
 	defaults: {
 		round_id: 0,
 		question_text: '',
 		question_sortkey: 0,
-		question_state: 0
+		question_state: 0,
+		question_answer: ''
 	}
+});
+var question_collection = Backbone.Collection.extend({
+	url : '/dl/api/question/list_all/',
+	model : question_model
 });
 
 /* person */
-person_model = Backbone.Model.extend({
+var person_model = Backbone.Model.extend({
 	urlRoot: '/trivia/api/person',
 	idAttribute: 'person_id',
 	defaults: {
 		person_name: '',
 		game_id: 0
 	}
+});
+var person_collection = Backbone.Collection.extend({
+	url : '/dl/api/person/list_all/',
+	model : person_model
 });
 

@@ -28,6 +28,9 @@ class game_model {
 	public $list_round;
 	public $list_person;
 
+	/* Sort clause to add when listing rows from this table */
+	const SORT_CLAUSE = " ORDER BY `game`.`game_id`";
+
 	/**
 	 * Initialise and load related tables
 	 */
@@ -46,7 +49,7 @@ class game_model {
 	 * @return array
 	 */
 	public function __construct(array $fields = array()) {
-/* Initialise everything as blank to avoid tripping up the permissions fitlers */
+		/* Initialise everything as blank to avoid tripping up the permissions fitlers */
 		$this -> game_id = '';
 		$this -> game_name = '';
 		$this -> game_state = '';
@@ -250,13 +253,13 @@ class game_model {
 		$everything = $this -> to_array();
 		$data['game_id'] = $this -> get_game_id();
 		foreach($this -> model_variables_changed as $col => $changed) {
-			$fieldset[] = "$col = :$col";
+			$fieldset[] = "`$col` = :$col";
 			$data[$col] = $everything[$col];
 		}
 		$fields = implode(", ", $fieldset);
 
 		/* Execute query */
-		$sth = database::$dbh -> prepare("UPDATE game SET $fields WHERE game_id = :game_id");
+		$sth = database::$dbh -> prepare("UPDATE `game` SET $fields WHERE `game`.`game_id` = :game_id");
 		$sth -> execute($data);
 	}
 
@@ -273,7 +276,7 @@ class game_model {
 		$data = array();
 		$everything = $this -> to_array();
 		foreach($this -> model_variables_set as $col => $changed) {
-			$fieldset[] = $col;
+			$fieldset[] = "`$col`";
 			$fieldset_colon[] = ":$col";
 			$data[$col] = $everything[$col];
 		}
@@ -281,7 +284,7 @@ class game_model {
 		$vals = implode(", ", $fieldset_colon);
 
 		/* Execute query */
-		$sth = database::$dbh -> prepare("INSERT INTO game ($fields) VALUES ($vals);");
+		$sth = database::$dbh -> prepare("INSERT INTO `game` ($fields) VALUES ($vals);");
 		$sth -> execute($data);
 		$this -> set_game_id(database::$dbh->lastInsertId());
 	}
@@ -290,7 +293,7 @@ class game_model {
 	 * Delete game
 	 */
 	public function delete() {
-		$sth = database::$dbh -> prepare("DELETE FROM game WHERE game_id = :game_id");
+		$sth = database::$dbh -> prepare("DELETE FROM `game` WHERE `game`.`game_id` = :game_id");
 		$data['game_id'] = $this -> get_game_id();
 		$sth -> execute($data);
 	}
@@ -332,7 +335,7 @@ class game_model {
 	 * Retrieve by primary key
 	 */
 	public static function get($game_id) {
-		$sth = database::$dbh -> prepare("SELECT game.game_id, game.game_name, game.game_state, game.game_code FROM game  WHERE game.game_id = :game_id;");
+		$sth = database::$dbh -> prepare("SELECT `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM game  WHERE `game`.`game_id` = :game_id;");
 		$sth -> execute(array('game_id' => $game_id));
 		$row = $sth -> fetch(PDO::FETCH_NUM);
 		if($row === false){
@@ -346,7 +349,7 @@ class game_model {
 	 * Retrieve by game_code
 	 */
 	public static function get_by_game_code($game_code) {
-		$sth = database::$dbh -> prepare("SELECT game.game_id, game.game_name, game.game_state, game.game_code FROM game  WHERE game.game_code = :game_code;");
+		$sth = database::$dbh -> prepare("SELECT `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM game  WHERE `game`.`game_code` = :game_code;");
 		$sth -> execute(array('game_code' => $game_code));
 		$row = $sth -> fetch(PDO::FETCH_NUM);
 		if($row === false){
@@ -366,11 +369,59 @@ class game_model {
 		$ls = "";
 		$start = (int)$start;
 		$limit = (int)$limit;
-		if($start > 0 && $limit > 0) {
-			$ls = " LIMIT $start, " . ($start + $limit);
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
 		}
-		$sth = database::$dbh -> prepare("SELECT game.game_id, game.game_name, game.game_state, game.game_code FROM game " . $ls . ";");
+		$sth = database::$dbh -> prepare("SELECT `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `game` " . self::SORT_CLAUSE . $ls . ";");
 		$sth -> execute();
+		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
+		$ret = array();
+		foreach($rows as $row) {
+			$assoc = self::row_to_assoc($row);
+			$ret[] = new game_model($assoc);
+		}
+		return $ret;
+	}
+
+	/**
+	 * Simple search within game_name field
+	 * 
+	 * @param int $start Row to begin from. Default 0 (begin from start)
+	 * @param int $limit Maximum number of rows to retrieve. Default -1 (no limit)
+	 */
+	public static function search_by_game_name($search, $start = 0, $limit = -1) {
+		$ls = "";
+		$start = (int)$start;
+		$limit = (int)$limit;
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
+		}
+		$sth = database::$dbh -> prepare("SELECT `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `game`  WHERE game_name LIKE :search" . self::SORT_CLAUSE . $ls . ";");
+		$sth -> execute(array('search' => "%".$search."%"));
+		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
+		$ret = array();
+		foreach($rows as $row) {
+			$assoc = self::row_to_assoc($row);
+			$ret[] = new game_model($assoc);
+		}
+		return $ret;
+	}
+
+	/**
+	 * Simple search within game_code field
+	 * 
+	 * @param int $start Row to begin from. Default 0 (begin from start)
+	 * @param int $limit Maximum number of rows to retrieve. Default -1 (no limit)
+	 */
+	public static function search_by_game_code($search, $start = 0, $limit = -1) {
+		$ls = "";
+		$start = (int)$start;
+		$limit = (int)$limit;
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
+		}
+		$sth = database::$dbh -> prepare("SELECT `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `game`  WHERE game_code LIKE :search" . self::SORT_CLAUSE . $ls . ";");
+		$sth -> execute(array('search' => "%".$search."%"));
 		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
 		$ret = array();
 		foreach($rows as $row) {

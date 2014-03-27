@@ -43,7 +43,7 @@ class person_table_controller {
 		}
 	}
 
-	public static function read($round_id,$person_id) {
+	public static function read($round_id = null,$person_id = null) {
 		/* Check permission */
 		$role = session::getRole();
 		if(!isset(core::$permission[$role]['person_table']['read']) || count(core::$permission[$role]['person_table']['read']) == 0) {
@@ -58,7 +58,7 @@ class person_table_controller {
 		return $person_table -> to_array_filtered($role);
 	}
 
-	public static function update($round_id,$person_id) {
+	public static function update($round_id = null,$person_id = null) {
 		/* Check permission */
 		$role = session::getRole();
 		if(!isset(core::$permission[$role]['person_table']['update']) || count(core::$permission[$role]['person_table']['update']) == 0) {
@@ -98,7 +98,7 @@ class person_table_controller {
 		}
 	}
 
-	public static function delete($round_id,$person_id) {
+	public static function delete($round_id = null,$person_id = null) {
 		/* Check permission */
 		$role = session::getRole();
 		if(!isset(core::$permission[$role]['person_table']['delete']) || core::$permission[$role]['person_table']['delete'] != true) {
@@ -118,6 +118,33 @@ class person_table_controller {
 			return array('success' => 'yes');
 		} catch(Exception $e) {
 			return array('error' => 'Failed to delete', 'code' => '500');
+		}
+	}
+
+	public static function list_all($page = 1, $itemspp = 20) {
+		/* Check permission */
+		$role = session::getRole();
+		if(!isset(core::$permission[$role]['person_table']['read']) || count(core::$permission[$role]['person_table']['read']) == 0) {
+			return array('error' => 'You do not have permission to do that', 'code' => '403');
+		}
+		if((int)$page < 1 || (int)$itemspp < 1) {
+			$start = 0;
+			$limit = -1;
+		} else {
+			$start = ($page - 1) * $itemspp;
+			$limit = $itemspp;
+		}
+
+		/* Retrieve and filter rows */
+		try {
+			$person_table_list = person_table_model::list_all($start, $limit);
+			$ret = array();
+			foreach($person_table_list as $person_table) {
+				$ret[] = $person_table -> to_array_filtered($role);
+			}
+			return $ret;
+		} catch(Exception $e) {
+			return array('error' => 'Failed to list', 'code' => '500');
 		}
 	}
 }

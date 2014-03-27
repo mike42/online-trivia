@@ -22,6 +22,9 @@ class team_round_model {
 	public $round;
 	public $team;
 
+	/* Sort clause to add when listing rows from this table */
+	const SORT_CLAUSE = " ORDER BY `team_round`.`round_round_id`, `team_round`.`team_team_id`";
+
 	/**
 	 * Initialise and load related tables
 	 */
@@ -37,7 +40,7 @@ class team_round_model {
 	 * @return array
 	 */
 	public function __construct(array $fields = array()) {
-/* Initialise everything as blank to avoid tripping up the permissions fitlers */
+		/* Initialise everything as blank to avoid tripping up the permissions fitlers */
 		$this -> round_round_id = '';
 		$this -> team_team_id = '';
 		$this -> bonus_points = '';
@@ -212,13 +215,13 @@ class team_round_model {
 		$data['round_round_id'] = $this -> get_round_round_id();
 		$data['team_team_id'] = $this -> get_team_team_id();
 		foreach($this -> model_variables_changed as $col => $changed) {
-			$fieldset[] = "$col = :$col";
+			$fieldset[] = "`$col` = :$col";
 			$data[$col] = $everything[$col];
 		}
 		$fields = implode(", ", $fieldset);
 
 		/* Execute query */
-		$sth = database::$dbh -> prepare("UPDATE team_round SET $fields WHERE round_round_id = :round_round_id AND team_team_id = :team_team_id");
+		$sth = database::$dbh -> prepare("UPDATE `team_round` SET $fields WHERE `team_round`.`round_round_id` = :round_round_id AND `team_round`.`team_team_id` = :team_team_id");
 		$sth -> execute($data);
 	}
 
@@ -235,7 +238,7 @@ class team_round_model {
 		$data = array();
 		$everything = $this -> to_array();
 		foreach($this -> model_variables_set as $col => $changed) {
-			$fieldset[] = $col;
+			$fieldset[] = "`$col`";
 			$fieldset_colon[] = ":$col";
 			$data[$col] = $everything[$col];
 		}
@@ -243,7 +246,7 @@ class team_round_model {
 		$vals = implode(", ", $fieldset_colon);
 
 		/* Execute query */
-		$sth = database::$dbh -> prepare("INSERT INTO team_round ($fields) VALUES ($vals);");
+		$sth = database::$dbh -> prepare("INSERT INTO `team_round` ($fields) VALUES ($vals);");
 		$sth -> execute($data);
 	}
 
@@ -251,7 +254,7 @@ class team_round_model {
 	 * Delete team_round
 	 */
 	public function delete() {
-		$sth = database::$dbh -> prepare("DELETE FROM team_round WHERE round_round_id = :round_round_id AND team_team_id = :team_team_id");
+		$sth = database::$dbh -> prepare("DELETE FROM `team_round` WHERE `team_round`.`round_round_id` = :round_round_id AND `team_round`.`team_team_id` = :team_team_id");
 		$data['round_round_id'] = $this -> get_round_round_id();
 		$data['team_team_id'] = $this -> get_team_team_id();
 		$sth -> execute($data);
@@ -261,7 +264,7 @@ class team_round_model {
 	 * Retrieve by primary key
 	 */
 	public static function get($round_round_id, $team_team_id) {
-		$sth = database::$dbh -> prepare("SELECT team_round.round_round_id, team_round.team_team_id, team_round.bonus_points, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, team.team_id, team.team_code, team.game_id, team.team_name, game.game_id, game.game_name, game.game_state, game.game_code FROM team_round JOIN round ON team_round.round_round_id = round.round_id JOIN team ON team_round.team_team_id = team.team_id JOIN game ON round.game_id = game.game_id WHERE team_round.round_round_id = :round_round_id AND team_round.team_team_id = :team_team_id;");
+		$sth = database::$dbh -> prepare("SELECT `team_round`.`round_round_id`, `team_round`.`team_team_id`, `team_round`.`bonus_points`, `round`.`round_id`, `round`.`name`, `round`.`game_id`, `round`.`round_sortkey`, `round`.`round_state`, `team`.`team_id`, `team`.`team_code`, `team`.`game_id`, `team`.`team_name`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM team_round JOIN `round` ON `team_round`.`round_round_id` = `round`.`round_id` JOIN `team` ON `team_round`.`team_team_id` = `team`.`team_id` JOIN `game` ON `round`.`game_id` = `game`.`game_id` WHERE `team_round`.`round_round_id` = :round_round_id AND `team_round`.`team_team_id` = :team_team_id;");
 		$sth -> execute(array('round_round_id' => $round_round_id, 'team_team_id' => $team_team_id));
 		$row = $sth -> fetch(PDO::FETCH_NUM);
 		if($row === false){
@@ -281,10 +284,10 @@ class team_round_model {
 		$ls = "";
 		$start = (int)$start;
 		$limit = (int)$limit;
-		if($start > 0 && $limit > 0) {
-			$ls = " LIMIT $start, " . ($start + $limit);
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
 		}
-		$sth = database::$dbh -> prepare("SELECT team_round.round_round_id, team_round.team_team_id, team_round.bonus_points, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, team.team_id, team.team_code, team.game_id, team.team_name, game.game_id, game.game_name, game.game_state, game.game_code FROM team_round JOIN round ON team_round.round_round_id = round.round_id JOIN team ON team_round.team_team_id = team.team_id JOIN game ON round.game_id = game.game_id" . $ls . ";");
+		$sth = database::$dbh -> prepare("SELECT `team_round`.`round_round_id`, `team_round`.`team_team_id`, `team_round`.`bonus_points`, `round`.`round_id`, `round`.`name`, `round`.`game_id`, `round`.`round_sortkey`, `round`.`round_state`, `team`.`team_id`, `team`.`team_code`, `team`.`game_id`, `team`.`team_name`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `team_round` JOIN `round` ON `team_round`.`round_round_id` = `round`.`round_id` JOIN `team` ON `team_round`.`team_team_id` = `team`.`team_id` JOIN `game` ON `round`.`game_id` = `game`.`game_id`" . self::SORT_CLAUSE . $ls . ";");
 		$sth -> execute();
 		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
 		$ret = array();
@@ -305,10 +308,10 @@ class team_round_model {
 		$ls = "";
 		$start = (int)$start;
 		$limit = (int)$limit;
-		if($start > 0 && $limit > 0) {
-			$ls = " LIMIT $start, " . ($start + $limit);
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
 		}
-		$sth = database::$dbh -> prepare("SELECT team_round.round_round_id, team_round.team_team_id, team_round.bonus_points, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, team.team_id, team.team_code, team.game_id, team.team_name, game.game_id, game.game_name, game.game_state, game.game_code FROM team_round JOIN round ON team_round.round_round_id = round.round_id JOIN team ON team_round.team_team_id = team.team_id JOIN game ON round.game_id = game.game_id WHERE team_round.team_team_id = :team_team_id" . $ls . ";");
+		$sth = database::$dbh -> prepare("SELECT `team_round`.`round_round_id`, `team_round`.`team_team_id`, `team_round`.`bonus_points`, `round`.`round_id`, `round`.`name`, `round`.`game_id`, `round`.`round_sortkey`, `round`.`round_state`, `team`.`team_id`, `team`.`team_code`, `team`.`game_id`, `team`.`team_name`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `team_round` JOIN `round` ON `team_round`.`round_round_id` = `round`.`round_id` JOIN `team` ON `team_round`.`team_team_id` = `team`.`team_id` JOIN `game` ON `round`.`game_id` = `game`.`game_id` WHERE team_round.team_team_id = :team_team_id" . self::SORT_CLAUSE . $ls . ";");
 		$sth -> execute(array('team_team_id' => $team_team_id));
 		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
 		$ret = array();

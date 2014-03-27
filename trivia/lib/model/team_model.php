@@ -31,6 +31,9 @@ class team_model {
 	public $list_person_table;
 	public $list_team_round;
 
+	/* Sort clause to add when listing rows from this table */
+	const SORT_CLAUSE = " ORDER BY `team`.`team_id`";
+
 	/**
 	 * Initialise and load related tables
 	 */
@@ -50,7 +53,7 @@ class team_model {
 	 * @return array
 	 */
 	public function __construct(array $fields = array()) {
-/* Initialise everything as blank to avoid tripping up the permissions fitlers */
+		/* Initialise everything as blank to avoid tripping up the permissions fitlers */
 		$this -> team_id = '';
 		$this -> team_code = '';
 		$this -> game_id = '';
@@ -260,13 +263,13 @@ class team_model {
 		$everything = $this -> to_array();
 		$data['team_id'] = $this -> get_team_id();
 		foreach($this -> model_variables_changed as $col => $changed) {
-			$fieldset[] = "$col = :$col";
+			$fieldset[] = "`$col` = :$col";
 			$data[$col] = $everything[$col];
 		}
 		$fields = implode(", ", $fieldset);
 
 		/* Execute query */
-		$sth = database::$dbh -> prepare("UPDATE team SET $fields WHERE team_id = :team_id");
+		$sth = database::$dbh -> prepare("UPDATE `team` SET $fields WHERE `team`.`team_id` = :team_id");
 		$sth -> execute($data);
 	}
 
@@ -283,7 +286,7 @@ class team_model {
 		$data = array();
 		$everything = $this -> to_array();
 		foreach($this -> model_variables_set as $col => $changed) {
-			$fieldset[] = $col;
+			$fieldset[] = "`$col`";
 			$fieldset_colon[] = ":$col";
 			$data[$col] = $everything[$col];
 		}
@@ -291,7 +294,7 @@ class team_model {
 		$vals = implode(", ", $fieldset_colon);
 
 		/* Execute query */
-		$sth = database::$dbh -> prepare("INSERT INTO team ($fields) VALUES ($vals);");
+		$sth = database::$dbh -> prepare("INSERT INTO `team` ($fields) VALUES ($vals);");
 		$sth -> execute($data);
 		$this -> set_team_id(database::$dbh->lastInsertId());
 	}
@@ -300,7 +303,7 @@ class team_model {
 	 * Delete team
 	 */
 	public function delete() {
-		$sth = database::$dbh -> prepare("DELETE FROM team WHERE team_id = :team_id");
+		$sth = database::$dbh -> prepare("DELETE FROM `team` WHERE `team`.`team_id` = :team_id");
 		$data['team_id'] = $this -> get_team_id();
 		$sth -> execute($data);
 	}
@@ -342,7 +345,7 @@ class team_model {
 	 * Retrieve by primary key
 	 */
 	public static function get($team_id) {
-		$sth = database::$dbh -> prepare("SELECT team.team_id, team.team_code, team.game_id, team.team_name, game.game_id, game.game_name, game.game_state, game.game_code FROM team JOIN game ON team.game_id = game.game_id WHERE team.team_id = :team_id;");
+		$sth = database::$dbh -> prepare("SELECT `team`.`team_id`, `team`.`team_code`, `team`.`game_id`, `team`.`team_name`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM team JOIN `game` ON `team`.`game_id` = `game`.`game_id` WHERE `team`.`team_id` = :team_id;");
 		$sth -> execute(array('team_id' => $team_id));
 		$row = $sth -> fetch(PDO::FETCH_NUM);
 		if($row === false){
@@ -356,7 +359,7 @@ class team_model {
 	 * Retrieve by team_code
 	 */
 	public static function get_by_team_code($team_code) {
-		$sth = database::$dbh -> prepare("SELECT team.team_id, team.team_code, team.game_id, team.team_name, game.game_id, game.game_name, game.game_state, game.game_code FROM team JOIN game ON team.game_id = game.game_id WHERE team.team_code = :team_code;");
+		$sth = database::$dbh -> prepare("SELECT `team`.`team_id`, `team`.`team_code`, `team`.`game_id`, `team`.`team_name`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM team JOIN `game` ON `team`.`game_id` = `game`.`game_id` WHERE `team`.`team_code` = :team_code;");
 		$sth -> execute(array('team_code' => $team_code));
 		$row = $sth -> fetch(PDO::FETCH_NUM);
 		if($row === false){
@@ -376,10 +379,10 @@ class team_model {
 		$ls = "";
 		$start = (int)$start;
 		$limit = (int)$limit;
-		if($start > 0 && $limit > 0) {
-			$ls = " LIMIT $start, " . ($start + $limit);
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
 		}
-		$sth = database::$dbh -> prepare("SELECT team.team_id, team.team_code, team.game_id, team.team_name, game.game_id, game.game_name, game.game_state, game.game_code FROM team JOIN game ON team.game_id = game.game_id" . $ls . ";");
+		$sth = database::$dbh -> prepare("SELECT `team`.`team_id`, `team`.`team_code`, `team`.`game_id`, `team`.`team_name`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `team` JOIN `game` ON `team`.`game_id` = `game`.`game_id`" . self::SORT_CLAUSE . $ls . ";");
 		$sth -> execute();
 		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
 		$ret = array();
@@ -400,11 +403,59 @@ class team_model {
 		$ls = "";
 		$start = (int)$start;
 		$limit = (int)$limit;
-		if($start > 0 && $limit > 0) {
-			$ls = " LIMIT $start, " . ($start + $limit);
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
 		}
-		$sth = database::$dbh -> prepare("SELECT team.team_id, team.team_code, team.game_id, team.team_name, game.game_id, game.game_name, game.game_state, game.game_code FROM team JOIN game ON team.game_id = game.game_id WHERE team.game_id = :game_id" . $ls . ";");
+		$sth = database::$dbh -> prepare("SELECT `team`.`team_id`, `team`.`team_code`, `team`.`game_id`, `team`.`team_name`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `team` JOIN `game` ON `team`.`game_id` = `game`.`game_id` WHERE team.game_id = :game_id" . self::SORT_CLAUSE . $ls . ";");
 		$sth -> execute(array('game_id' => $game_id));
+		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
+		$ret = array();
+		foreach($rows as $row) {
+			$assoc = self::row_to_assoc($row);
+			$ret[] = new team_model($assoc);
+		}
+		return $ret;
+	}
+
+	/**
+	 * Simple search within team_code field
+	 * 
+	 * @param int $start Row to begin from. Default 0 (begin from start)
+	 * @param int $limit Maximum number of rows to retrieve. Default -1 (no limit)
+	 */
+	public static function search_by_team_code($search, $start = 0, $limit = -1) {
+		$ls = "";
+		$start = (int)$start;
+		$limit = (int)$limit;
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
+		}
+		$sth = database::$dbh -> prepare("SELECT `team`.`team_id`, `team`.`team_code`, `team`.`game_id`, `team`.`team_name`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `team` JOIN `game` ON `team`.`game_id` = `game`.`game_id` WHERE team_code LIKE :search" . self::SORT_CLAUSE . $ls . ";");
+		$sth -> execute(array('search' => "%".$search."%"));
+		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
+		$ret = array();
+		foreach($rows as $row) {
+			$assoc = self::row_to_assoc($row);
+			$ret[] = new team_model($assoc);
+		}
+		return $ret;
+	}
+
+	/**
+	 * Simple search within team_name field
+	 * 
+	 * @param int $start Row to begin from. Default 0 (begin from start)
+	 * @param int $limit Maximum number of rows to retrieve. Default -1 (no limit)
+	 */
+	public static function search_by_team_name($search, $start = 0, $limit = -1) {
+		$ls = "";
+		$start = (int)$start;
+		$limit = (int)$limit;
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
+		}
+		$sth = database::$dbh -> prepare("SELECT `team`.`team_id`, `team`.`team_code`, `team`.`game_id`, `team`.`team_name`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `team` JOIN `game` ON `team`.`game_id` = `game`.`game_id` WHERE team_name LIKE :search" . self::SORT_CLAUSE . $ls . ";");
+		$sth -> execute(array('search' => "%".$search."%"));
 		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
 		$ret = array();
 		foreach($rows as $row) {

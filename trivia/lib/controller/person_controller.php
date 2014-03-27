@@ -37,7 +37,7 @@ class person_controller {
 		}
 	}
 
-	public static function read($person_id) {
+	public static function read($person_id = null) {
 		/* Check permission */
 		$role = session::getRole();
 		if(!isset(core::$permission[$role]['person']['read']) || count(core::$permission[$role]['person']['read']) == 0) {
@@ -53,7 +53,7 @@ class person_controller {
 		return $person -> to_array_filtered($role);
 	}
 
-	public static function update($person_id) {
+	public static function update($person_id = null) {
 		/* Check permission */
 		$role = session::getRole();
 		if(!isset(core::$permission[$role]['person']['update']) || count(core::$permission[$role]['person']['update']) == 0) {
@@ -90,7 +90,7 @@ class person_controller {
 		}
 	}
 
-	public static function delete($person_id) {
+	public static function delete($person_id = null) {
 		/* Check permission */
 		$role = session::getRole();
 		if(!isset(core::$permission[$role]['person']['delete']) || core::$permission[$role]['person']['delete'] != true) {
@@ -115,6 +115,33 @@ class person_controller {
 			return array('success' => 'yes');
 		} catch(Exception $e) {
 			return array('error' => 'Failed to delete', 'code' => '500');
+		}
+	}
+
+	public static function list_all($page = 1, $itemspp = 20) {
+		/* Check permission */
+		$role = session::getRole();
+		if(!isset(core::$permission[$role]['person']['read']) || count(core::$permission[$role]['person']['read']) == 0) {
+			return array('error' => 'You do not have permission to do that', 'code' => '403');
+		}
+		if((int)$page < 1 || (int)$itemspp < 1) {
+			$start = 0;
+			$limit = -1;
+		} else {
+			$start = ($page - 1) * $itemspp;
+			$limit = $itemspp;
+		}
+
+		/* Retrieve and filter rows */
+		try {
+			$person_list = person_model::list_all($start, $limit);
+			$ret = array();
+			foreach($person_list as $person) {
+				$ret[] = $person -> to_array_filtered($role);
+			}
+			return $ret;
+		} catch(Exception $e) {
+			return array('error' => 'Failed to list', 'code' => '500');
 		}
 	}
 }

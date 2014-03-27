@@ -24,6 +24,9 @@ class person_model {
 	/* Child tables */
 	public $list_person_table;
 
+	/* Sort clause to add when listing rows from this table */
+	const SORT_CLAUSE = " ORDER BY `person`.`person_id`";
+
 	/**
 	 * Initialise and load related tables
 	 */
@@ -41,7 +44,7 @@ class person_model {
 	 * @return array
 	 */
 	public function __construct(array $fields = array()) {
-/* Initialise everything as blank to avoid tripping up the permissions fitlers */
+		/* Initialise everything as blank to avoid tripping up the permissions fitlers */
 		$this -> person_id = '';
 		$this -> person_name = '';
 		$this -> game_id = '';
@@ -209,13 +212,13 @@ class person_model {
 		$everything = $this -> to_array();
 		$data['person_id'] = $this -> get_person_id();
 		foreach($this -> model_variables_changed as $col => $changed) {
-			$fieldset[] = "$col = :$col";
+			$fieldset[] = "`$col` = :$col";
 			$data[$col] = $everything[$col];
 		}
 		$fields = implode(", ", $fieldset);
 
 		/* Execute query */
-		$sth = database::$dbh -> prepare("UPDATE person SET $fields WHERE person_id = :person_id");
+		$sth = database::$dbh -> prepare("UPDATE `person` SET $fields WHERE `person`.`person_id` = :person_id");
 		$sth -> execute($data);
 	}
 
@@ -232,7 +235,7 @@ class person_model {
 		$data = array();
 		$everything = $this -> to_array();
 		foreach($this -> model_variables_set as $col => $changed) {
-			$fieldset[] = $col;
+			$fieldset[] = "`$col`";
 			$fieldset_colon[] = ":$col";
 			$data[$col] = $everything[$col];
 		}
@@ -240,7 +243,7 @@ class person_model {
 		$vals = implode(", ", $fieldset_colon);
 
 		/* Execute query */
-		$sth = database::$dbh -> prepare("INSERT INTO person ($fields) VALUES ($vals);");
+		$sth = database::$dbh -> prepare("INSERT INTO `person` ($fields) VALUES ($vals);");
 		$sth -> execute($data);
 		$this -> set_person_id(database::$dbh->lastInsertId());
 	}
@@ -249,7 +252,7 @@ class person_model {
 	 * Delete person
 	 */
 	public function delete() {
-		$sth = database::$dbh -> prepare("DELETE FROM person WHERE person_id = :person_id");
+		$sth = database::$dbh -> prepare("DELETE FROM `person` WHERE `person`.`person_id` = :person_id");
 		$data['person_id'] = $this -> get_person_id();
 		$sth -> execute($data);
 	}
@@ -269,7 +272,7 @@ class person_model {
 	 * Retrieve by primary key
 	 */
 	public static function get($person_id) {
-		$sth = database::$dbh -> prepare("SELECT person.person_id, person.person_name, person.game_id, game.game_id, game.game_name, game.game_state, game.game_code FROM person JOIN game ON person.game_id = game.game_id WHERE person.person_id = :person_id;");
+		$sth = database::$dbh -> prepare("SELECT `person`.`person_id`, `person`.`person_name`, `person`.`game_id`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM person JOIN `game` ON `person`.`game_id` = `game`.`game_id` WHERE `person`.`person_id` = :person_id;");
 		$sth -> execute(array('person_id' => $person_id));
 		$row = $sth -> fetch(PDO::FETCH_NUM);
 		if($row === false){
@@ -289,10 +292,10 @@ class person_model {
 		$ls = "";
 		$start = (int)$start;
 		$limit = (int)$limit;
-		if($start > 0 && $limit > 0) {
-			$ls = " LIMIT $start, " . ($start + $limit);
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
 		}
-		$sth = database::$dbh -> prepare("SELECT person.person_id, person.person_name, person.game_id, game.game_id, game.game_name, game.game_state, game.game_code FROM person JOIN game ON person.game_id = game.game_id" . $ls . ";");
+		$sth = database::$dbh -> prepare("SELECT `person`.`person_id`, `person`.`person_name`, `person`.`game_id`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `person` JOIN `game` ON `person`.`game_id` = `game`.`game_id`" . self::SORT_CLAUSE . $ls . ";");
 		$sth -> execute();
 		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
 		$ret = array();
@@ -313,11 +316,35 @@ class person_model {
 		$ls = "";
 		$start = (int)$start;
 		$limit = (int)$limit;
-		if($start > 0 && $limit > 0) {
-			$ls = " LIMIT $start, " . ($start + $limit);
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
 		}
-		$sth = database::$dbh -> prepare("SELECT person.person_id, person.person_name, person.game_id, game.game_id, game.game_name, game.game_state, game.game_code FROM person JOIN game ON person.game_id = game.game_id WHERE person.game_id = :game_id" . $ls . ";");
+		$sth = database::$dbh -> prepare("SELECT `person`.`person_id`, `person`.`person_name`, `person`.`game_id`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `person` JOIN `game` ON `person`.`game_id` = `game`.`game_id` WHERE person.game_id = :game_id" . self::SORT_CLAUSE . $ls . ";");
 		$sth -> execute(array('game_id' => $game_id));
+		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
+		$ret = array();
+		foreach($rows as $row) {
+			$assoc = self::row_to_assoc($row);
+			$ret[] = new person_model($assoc);
+		}
+		return $ret;
+	}
+
+	/**
+	 * Simple search within person_name field
+	 * 
+	 * @param int $start Row to begin from. Default 0 (begin from start)
+	 * @param int $limit Maximum number of rows to retrieve. Default -1 (no limit)
+	 */
+	public static function search_by_person_name($search, $start = 0, $limit = -1) {
+		$ls = "";
+		$start = (int)$start;
+		$limit = (int)$limit;
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
+		}
+		$sth = database::$dbh -> prepare("SELECT `person`.`person_id`, `person`.`person_name`, `person`.`game_id`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `person` JOIN `game` ON `person`.`game_id` = `game`.`game_id` WHERE person_name LIKE :search" . self::SORT_CLAUSE . $ls . ";");
+		$sth -> execute(array('search' => "%".$search."%"));
 		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
 		$ret = array();
 		foreach($rows as $row) {

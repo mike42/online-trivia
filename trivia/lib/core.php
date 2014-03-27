@@ -20,7 +20,12 @@ class core {
 
 		require_once($fn);
 		if(is_callable($className . "::init")) {
-			call_user_func($className . "::init");
+			try {
+				call_user_func($className . "::init");
+			} catch(Exception $e) {
+				/* JSON-encode the error message if a class fails to start */
+				core::fizzle($e -> getMessage(), '500');
+			}
 		}
 	}
 

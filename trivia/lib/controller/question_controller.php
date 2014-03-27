@@ -13,7 +13,7 @@ class question_controller {
 		}
 
 		/* Find fields to insert */
-		$fields = array('question_id', 'round_id', 'question_text', 'question_sortkey', 'question_state');
+		$fields = array('question_id', 'round_id', 'question_text', 'question_sortkey', 'question_state', 'question_answer');
 		$init = array();
 		$received = json_decode(file_get_contents('php://input'), true, 2);
 		foreach($fields as $field) {
@@ -37,7 +37,7 @@ class question_controller {
 		}
 	}
 
-	public static function read($question_id) {
+	public static function read($question_id = null) {
 		/* Check permission */
 		$role = session::getRole();
 		if(!isset(core::$permission[$role]['question']['read']) || count(core::$permission[$role]['question']['read']) == 0) {
@@ -53,7 +53,7 @@ class question_controller {
 		return $question -> to_array_filtered($role);
 	}
 
-	public static function update($question_id) {
+	public static function update($question_id = null) {
 		/* Check permission */
 		$role = session::getRole();
 		if(!isset(core::$permission[$role]['question']['update']) || count(core::$permission[$role]['question']['update']) == 0) {
@@ -81,6 +81,9 @@ class question_controller {
 		if(isset($received['question_state']) && in_array('question_state', core::$permission[$role]['question']['update'])) {
 			$question -> set_question_state($received['question_state']);
 		}
+		if(isset($received['question_answer']) && in_array('question_answer', core::$permission[$role]['question']['update'])) {
+			$question -> set_question_answer($received['question_answer']);
+		}
 
 		/* Check parent tables */
 		if(!round_model::get($question -> get_round_id())) {
@@ -96,7 +99,7 @@ class question_controller {
 		}
 	}
 
-	public static function delete($question_id) {
+	public static function delete($question_id = null) {
 		/* Check permission */
 		$role = session::getRole();
 		if(!isset(core::$permission[$role]['question']['delete']) || core::$permission[$role]['question']['delete'] != true) {
@@ -121,6 +124,33 @@ class question_controller {
 			return array('success' => 'yes');
 		} catch(Exception $e) {
 			return array('error' => 'Failed to delete', 'code' => '500');
+		}
+	}
+
+	public static function list_all($page = 1, $itemspp = 20) {
+		/* Check permission */
+		$role = session::getRole();
+		if(!isset(core::$permission[$role]['question']['read']) || count(core::$permission[$role]['question']['read']) == 0) {
+			return array('error' => 'You do not have permission to do that', 'code' => '403');
+		}
+		if((int)$page < 1 || (int)$itemspp < 1) {
+			$start = 0;
+			$limit = -1;
+		} else {
+			$start = ($page - 1) * $itemspp;
+			$limit = $itemspp;
+		}
+
+		/* Retrieve and filter rows */
+		try {
+			$question_list = question_model::list_all($start, $limit);
+			$ret = array();
+			foreach($question_list as $question) {
+				$ret[] = $question -> to_array_filtered($role);
+			}
+			return $ret;
+		} catch(Exception $e) {
+			return array('error' => 'Failed to list', 'code' => '500');
 		}
 	}
 }

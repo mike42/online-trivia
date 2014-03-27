@@ -32,6 +32,9 @@ class answer_model {
 	public $question;
 	public $team;
 
+	/* Sort clause to add when listing rows from this table */
+	const SORT_CLAUSE = " ORDER BY `answer`.`question_id`, `answer`.`team_id`";
+
 	/**
 	 * Initialise and load related tables
 	 */
@@ -47,7 +50,7 @@ class answer_model {
 	 * @return array
 	 */
 	public function __construct(array $fields = array()) {
-/* Initialise everything as blank to avoid tripping up the permissions fitlers */
+		/* Initialise everything as blank to avoid tripping up the permissions fitlers */
 		$this -> question_id = '';
 		$this -> team_id = '';
 		$this -> answer_text = '';
@@ -131,19 +134,20 @@ class answer_model {
 			"question.question_text" => $row[7],
 			"question.question_sortkey" => $row[8],
 			"question.question_state" => $row[9],
-			"team.team_id" => $row[10],
-			"team.team_code" => $row[11],
-			"team.game_id" => $row[12],
-			"team.team_name" => $row[13],
-			"round.round_id" => $row[14],
-			"round.name" => $row[15],
-			"round.game_id" => $row[16],
-			"round.round_sortkey" => $row[17],
-			"round.round_state" => $row[18],
-			"game.game_id" => $row[19],
-			"game.game_name" => $row[20],
-			"game.game_state" => $row[21],
-			"game.game_code" => $row[22]);
+			"question.question_answer" => $row[10],
+			"team.team_id" => $row[11],
+			"team.team_code" => $row[12],
+			"team.game_id" => $row[13],
+			"team.team_name" => $row[14],
+			"round.round_id" => $row[15],
+			"round.name" => $row[16],
+			"round.game_id" => $row[17],
+			"round.round_sortkey" => $row[18],
+			"round.round_state" => $row[19],
+			"game.game_id" => $row[20],
+			"game.game_name" => $row[21],
+			"game.game_state" => $row[22],
+			"game.game_code" => $row[23]);
 		return $values;
 	}
 
@@ -287,13 +291,13 @@ class answer_model {
 		$data['question_id'] = $this -> get_question_id();
 		$data['team_id'] = $this -> get_team_id();
 		foreach($this -> model_variables_changed as $col => $changed) {
-			$fieldset[] = "$col = :$col";
+			$fieldset[] = "`$col` = :$col";
 			$data[$col] = $everything[$col];
 		}
 		$fields = implode(", ", $fieldset);
 
 		/* Execute query */
-		$sth = database::$dbh -> prepare("UPDATE answer SET $fields WHERE question_id = :question_id AND team_id = :team_id");
+		$sth = database::$dbh -> prepare("UPDATE `answer` SET $fields WHERE `answer`.`question_id` = :question_id AND `answer`.`team_id` = :team_id");
 		$sth -> execute($data);
 	}
 
@@ -310,7 +314,7 @@ class answer_model {
 		$data = array();
 		$everything = $this -> to_array();
 		foreach($this -> model_variables_set as $col => $changed) {
-			$fieldset[] = $col;
+			$fieldset[] = "`$col`";
 			$fieldset_colon[] = ":$col";
 			$data[$col] = $everything[$col];
 		}
@@ -318,7 +322,7 @@ class answer_model {
 		$vals = implode(", ", $fieldset_colon);
 
 		/* Execute query */
-		$sth = database::$dbh -> prepare("INSERT INTO answer ($fields) VALUES ($vals);");
+		$sth = database::$dbh -> prepare("INSERT INTO `answer` ($fields) VALUES ($vals);");
 		$sth -> execute($data);
 	}
 
@@ -326,7 +330,7 @@ class answer_model {
 	 * Delete answer
 	 */
 	public function delete() {
-		$sth = database::$dbh -> prepare("DELETE FROM answer WHERE question_id = :question_id AND team_id = :team_id");
+		$sth = database::$dbh -> prepare("DELETE FROM `answer` WHERE `answer`.`question_id` = :question_id AND `answer`.`team_id` = :team_id");
 		$data['question_id'] = $this -> get_question_id();
 		$data['team_id'] = $this -> get_team_id();
 		$sth -> execute($data);
@@ -336,7 +340,7 @@ class answer_model {
 	 * Retrieve by primary key
 	 */
 	public static function get($question_id, $team_id) {
-		$sth = database::$dbh -> prepare("SELECT answer.question_id, answer.team_id, answer.answer_text, answer.answer_is_correct, answer.answer_time, question.question_id, question.round_id, question.question_text, question.question_sortkey, question.question_state, team.team_id, team.team_code, team.game_id, team.team_name, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM answer JOIN question ON answer.question_id = question.question_id JOIN team ON answer.team_id = team.team_id JOIN round ON question.round_id = round.round_id JOIN game ON team.game_id = game.game_id WHERE answer.question_id = :question_id AND answer.team_id = :team_id;");
+		$sth = database::$dbh -> prepare("SELECT `answer`.`question_id`, `answer`.`team_id`, `answer`.`answer_text`, `answer`.`answer_is_correct`, `answer`.`answer_time`, `question`.`question_id`, `question`.`round_id`, `question`.`question_text`, `question`.`question_sortkey`, `question`.`question_state`, `question`.`question_answer`, `team`.`team_id`, `team`.`team_code`, `team`.`game_id`, `team`.`team_name`, `round`.`round_id`, `round`.`name`, `round`.`game_id`, `round`.`round_sortkey`, `round`.`round_state`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM answer JOIN `question` ON `answer`.`question_id` = `question`.`question_id` JOIN `team` ON `answer`.`team_id` = `team`.`team_id` JOIN `round` ON `question`.`round_id` = `round`.`round_id` JOIN `game` ON `team`.`game_id` = `game`.`game_id` WHERE `answer`.`question_id` = :question_id AND `answer`.`team_id` = :team_id;");
 		$sth -> execute(array('question_id' => $question_id, 'team_id' => $team_id));
 		$row = $sth -> fetch(PDO::FETCH_NUM);
 		if($row === false){
@@ -356,10 +360,10 @@ class answer_model {
 		$ls = "";
 		$start = (int)$start;
 		$limit = (int)$limit;
-		if($start > 0 && $limit > 0) {
-			$ls = " LIMIT $start, " . ($start + $limit);
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
 		}
-		$sth = database::$dbh -> prepare("SELECT answer.question_id, answer.team_id, answer.answer_text, answer.answer_is_correct, answer.answer_time, question.question_id, question.round_id, question.question_text, question.question_sortkey, question.question_state, team.team_id, team.team_code, team.game_id, team.team_name, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM answer JOIN question ON answer.question_id = question.question_id JOIN team ON answer.team_id = team.team_id JOIN round ON question.round_id = round.round_id JOIN game ON team.game_id = game.game_id" . $ls . ";");
+		$sth = database::$dbh -> prepare("SELECT `answer`.`question_id`, `answer`.`team_id`, `answer`.`answer_text`, `answer`.`answer_is_correct`, `answer`.`answer_time`, `question`.`question_id`, `question`.`round_id`, `question`.`question_text`, `question`.`question_sortkey`, `question`.`question_state`, `question`.`question_answer`, `team`.`team_id`, `team`.`team_code`, `team`.`game_id`, `team`.`team_name`, `round`.`round_id`, `round`.`name`, `round`.`game_id`, `round`.`round_sortkey`, `round`.`round_state`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `answer` JOIN `question` ON `answer`.`question_id` = `question`.`question_id` JOIN `team` ON `answer`.`team_id` = `team`.`team_id` JOIN `round` ON `question`.`round_id` = `round`.`round_id` JOIN `game` ON `team`.`game_id` = `game`.`game_id`" . self::SORT_CLAUSE . $ls . ";");
 		$sth -> execute();
 		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
 		$ret = array();
@@ -380,10 +384,10 @@ class answer_model {
 		$ls = "";
 		$start = (int)$start;
 		$limit = (int)$limit;
-		if($start > 0 && $limit > 0) {
-			$ls = " LIMIT $start, " . ($start + $limit);
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
 		}
-		$sth = database::$dbh -> prepare("SELECT answer.question_id, answer.team_id, answer.answer_text, answer.answer_is_correct, answer.answer_time, question.question_id, question.round_id, question.question_text, question.question_sortkey, question.question_state, team.team_id, team.team_code, team.game_id, team.team_name, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM answer JOIN question ON answer.question_id = question.question_id JOIN team ON answer.team_id = team.team_id JOIN round ON question.round_id = round.round_id JOIN game ON team.game_id = game.game_id WHERE answer.team_id = :team_id" . $ls . ";");
+		$sth = database::$dbh -> prepare("SELECT `answer`.`question_id`, `answer`.`team_id`, `answer`.`answer_text`, `answer`.`answer_is_correct`, `answer`.`answer_time`, `question`.`question_id`, `question`.`round_id`, `question`.`question_text`, `question`.`question_sortkey`, `question`.`question_state`, `question`.`question_answer`, `team`.`team_id`, `team`.`team_code`, `team`.`game_id`, `team`.`team_name`, `round`.`round_id`, `round`.`name`, `round`.`game_id`, `round`.`round_sortkey`, `round`.`round_state`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `answer` JOIN `question` ON `answer`.`question_id` = `question`.`question_id` JOIN `team` ON `answer`.`team_id` = `team`.`team_id` JOIN `round` ON `question`.`round_id` = `round`.`round_id` JOIN `game` ON `team`.`game_id` = `game`.`game_id` WHERE answer.team_id = :team_id" . self::SORT_CLAUSE . $ls . ";");
 		$sth -> execute(array('team_id' => $team_id));
 		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
 		$ret = array();
@@ -404,11 +408,59 @@ class answer_model {
 		$ls = "";
 		$start = (int)$start;
 		$limit = (int)$limit;
-		if($start > 0 && $limit > 0) {
-			$ls = " LIMIT $start, " . ($start + $limit);
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
 		}
-		$sth = database::$dbh -> prepare("SELECT answer.question_id, answer.team_id, answer.answer_text, answer.answer_is_correct, answer.answer_time, question.question_id, question.round_id, question.question_text, question.question_sortkey, question.question_state, team.team_id, team.team_code, team.game_id, team.team_name, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM answer JOIN question ON answer.question_id = question.question_id JOIN team ON answer.team_id = team.team_id JOIN round ON question.round_id = round.round_id JOIN game ON team.game_id = game.game_id WHERE answer.question_id = :question_id" . $ls . ";");
+		$sth = database::$dbh -> prepare("SELECT `answer`.`question_id`, `answer`.`team_id`, `answer`.`answer_text`, `answer`.`answer_is_correct`, `answer`.`answer_time`, `question`.`question_id`, `question`.`round_id`, `question`.`question_text`, `question`.`question_sortkey`, `question`.`question_state`, `question`.`question_answer`, `team`.`team_id`, `team`.`team_code`, `team`.`game_id`, `team`.`team_name`, `round`.`round_id`, `round`.`name`, `round`.`game_id`, `round`.`round_sortkey`, `round`.`round_state`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `answer` JOIN `question` ON `answer`.`question_id` = `question`.`question_id` JOIN `team` ON `answer`.`team_id` = `team`.`team_id` JOIN `round` ON `question`.`round_id` = `round`.`round_id` JOIN `game` ON `team`.`game_id` = `game`.`game_id` WHERE answer.question_id = :question_id" . self::SORT_CLAUSE . $ls . ";");
 		$sth -> execute(array('question_id' => $question_id));
+		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
+		$ret = array();
+		foreach($rows as $row) {
+			$assoc = self::row_to_assoc($row);
+			$ret[] = new answer_model($assoc);
+		}
+		return $ret;
+	}
+
+	/**
+	 * Simple search within answer_text field
+	 * 
+	 * @param int $start Row to begin from. Default 0 (begin from start)
+	 * @param int $limit Maximum number of rows to retrieve. Default -1 (no limit)
+	 */
+	public static function search_by_answer_text($search, $start = 0, $limit = -1) {
+		$ls = "";
+		$start = (int)$start;
+		$limit = (int)$limit;
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
+		}
+		$sth = database::$dbh -> prepare("SELECT `answer`.`question_id`, `answer`.`team_id`, `answer`.`answer_text`, `answer`.`answer_is_correct`, `answer`.`answer_time`, `question`.`question_id`, `question`.`round_id`, `question`.`question_text`, `question`.`question_sortkey`, `question`.`question_state`, `question`.`question_answer`, `team`.`team_id`, `team`.`team_code`, `team`.`game_id`, `team`.`team_name`, `round`.`round_id`, `round`.`name`, `round`.`game_id`, `round`.`round_sortkey`, `round`.`round_state`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `answer` JOIN `question` ON `answer`.`question_id` = `question`.`question_id` JOIN `team` ON `answer`.`team_id` = `team`.`team_id` JOIN `round` ON `question`.`round_id` = `round`.`round_id` JOIN `game` ON `team`.`game_id` = `game`.`game_id` WHERE answer_text LIKE :search" . self::SORT_CLAUSE . $ls . ";");
+		$sth -> execute(array('search' => "%".$search."%"));
+		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
+		$ret = array();
+		foreach($rows as $row) {
+			$assoc = self::row_to_assoc($row);
+			$ret[] = new answer_model($assoc);
+		}
+		return $ret;
+	}
+
+	/**
+	 * Simple search within answer_time field
+	 * 
+	 * @param int $start Row to begin from. Default 0 (begin from start)
+	 * @param int $limit Maximum number of rows to retrieve. Default -1 (no limit)
+	 */
+	public static function search_by_answer_time($search, $start = 0, $limit = -1) {
+		$ls = "";
+		$start = (int)$start;
+		$limit = (int)$limit;
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
+		}
+		$sth = database::$dbh -> prepare("SELECT `answer`.`question_id`, `answer`.`team_id`, `answer`.`answer_text`, `answer`.`answer_is_correct`, `answer`.`answer_time`, `question`.`question_id`, `question`.`round_id`, `question`.`question_text`, `question`.`question_sortkey`, `question`.`question_state`, `question`.`question_answer`, `team`.`team_id`, `team`.`team_code`, `team`.`game_id`, `team`.`team_name`, `round`.`round_id`, `round`.`name`, `round`.`game_id`, `round`.`round_sortkey`, `round`.`round_state`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `answer` JOIN `question` ON `answer`.`question_id` = `question`.`question_id` JOIN `team` ON `answer`.`team_id` = `team`.`team_id` JOIN `round` ON `question`.`round_id` = `round`.`round_id` JOIN `game` ON `team`.`game_id` = `game`.`game_id` WHERE answer_time LIKE :search" . self::SORT_CLAUSE . $ls . ";");
+		$sth -> execute(array('search' => "%".$search."%"));
 		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
 		$ret = array();
 		foreach($rows as $row) {

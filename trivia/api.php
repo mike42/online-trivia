@@ -59,9 +59,6 @@ if(count($arg) > 2) {
 	$controller = array_shift($arg);
 	$action = $config['default']['action'];
 }
-// Some dummy arguments to avoid undefined warnings
-$arg[] = '';
-$arg[] = '';
 
 /* Figure out class and method name */
 try {

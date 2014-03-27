@@ -34,6 +34,9 @@ class round_model {
 	/* Child tables */
 	public $list_question;
 
+	/* Sort clause to add when listing rows from this table */
+	const SORT_CLAUSE = " ORDER BY `round`.`round_id`";
+
 	/**
 	 * Initialise and load related tables
 	 */
@@ -51,7 +54,7 @@ class round_model {
 	 * @return array
 	 */
 	public function __construct(array $fields = array()) {
-/* Initialise everything as blank to avoid tripping up the permissions fitlers */
+		/* Initialise everything as blank to avoid tripping up the permissions fitlers */
 		$this -> round_id = '';
 		$this -> name = '';
 		$this -> game_id = '';
@@ -283,13 +286,13 @@ class round_model {
 		$everything = $this -> to_array();
 		$data['round_id'] = $this -> get_round_id();
 		foreach($this -> model_variables_changed as $col => $changed) {
-			$fieldset[] = "$col = :$col";
+			$fieldset[] = "`$col` = :$col";
 			$data[$col] = $everything[$col];
 		}
 		$fields = implode(", ", $fieldset);
 
 		/* Execute query */
-		$sth = database::$dbh -> prepare("UPDATE round SET $fields WHERE round_id = :round_id");
+		$sth = database::$dbh -> prepare("UPDATE `round` SET $fields WHERE `round`.`round_id` = :round_id");
 		$sth -> execute($data);
 	}
 
@@ -306,7 +309,7 @@ class round_model {
 		$data = array();
 		$everything = $this -> to_array();
 		foreach($this -> model_variables_set as $col => $changed) {
-			$fieldset[] = $col;
+			$fieldset[] = "`$col`";
 			$fieldset_colon[] = ":$col";
 			$data[$col] = $everything[$col];
 		}
@@ -314,7 +317,7 @@ class round_model {
 		$vals = implode(", ", $fieldset_colon);
 
 		/* Execute query */
-		$sth = database::$dbh -> prepare("INSERT INTO round ($fields) VALUES ($vals);");
+		$sth = database::$dbh -> prepare("INSERT INTO `round` ($fields) VALUES ($vals);");
 		$sth -> execute($data);
 		$this -> set_round_id(database::$dbh->lastInsertId());
 	}
@@ -323,7 +326,7 @@ class round_model {
 	 * Delete round
 	 */
 	public function delete() {
-		$sth = database::$dbh -> prepare("DELETE FROM round WHERE round_id = :round_id");
+		$sth = database::$dbh -> prepare("DELETE FROM `round` WHERE `round`.`round_id` = :round_id");
 		$data['round_id'] = $this -> get_round_id();
 		$sth -> execute($data);
 	}
@@ -343,7 +346,7 @@ class round_model {
 	 * Retrieve by primary key
 	 */
 	public static function get($round_id) {
-		$sth = database::$dbh -> prepare("SELECT round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM round JOIN game ON round.game_id = game.game_id WHERE round.round_id = :round_id;");
+		$sth = database::$dbh -> prepare("SELECT `round`.`round_id`, `round`.`name`, `round`.`game_id`, `round`.`round_sortkey`, `round`.`round_state`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM round JOIN `game` ON `round`.`game_id` = `game`.`game_id` WHERE `round`.`round_id` = :round_id;");
 		$sth -> execute(array('round_id' => $round_id));
 		$row = $sth -> fetch(PDO::FETCH_NUM);
 		if($row === false){
@@ -357,7 +360,7 @@ class round_model {
 	 * Retrieve by round_sort
 	 */
 	public static function get_by_round_sort($game_id, $round_sortkey) {
-		$sth = database::$dbh -> prepare("SELECT round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM round JOIN game ON round.game_id = game.game_id WHERE round.game_id = :game_id AND round.round_sortkey = :round_sortkey;");
+		$sth = database::$dbh -> prepare("SELECT `round`.`round_id`, `round`.`name`, `round`.`game_id`, `round`.`round_sortkey`, `round`.`round_state`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM round JOIN `game` ON `round`.`game_id` = `game`.`game_id` WHERE `round`.`game_id` = :game_id AND `round`.`round_sortkey` = :round_sortkey;");
 		$sth -> execute(array('game_id' => $game_id, 'round_sortkey' => $round_sortkey));
 		$row = $sth -> fetch(PDO::FETCH_NUM);
 		if($row === false){
@@ -377,10 +380,10 @@ class round_model {
 		$ls = "";
 		$start = (int)$start;
 		$limit = (int)$limit;
-		if($start > 0 && $limit > 0) {
-			$ls = " LIMIT $start, " . ($start + $limit);
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
 		}
-		$sth = database::$dbh -> prepare("SELECT round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM round JOIN game ON round.game_id = game.game_id" . $ls . ";");
+		$sth = database::$dbh -> prepare("SELECT `round`.`round_id`, `round`.`name`, `round`.`game_id`, `round`.`round_sortkey`, `round`.`round_state`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `round` JOIN `game` ON `round`.`game_id` = `game`.`game_id`" . self::SORT_CLAUSE . $ls . ";");
 		$sth -> execute();
 		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
 		$ret = array();
@@ -401,11 +404,35 @@ class round_model {
 		$ls = "";
 		$start = (int)$start;
 		$limit = (int)$limit;
-		if($start > 0 && $limit > 0) {
-			$ls = " LIMIT $start, " . ($start + $limit);
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
 		}
-		$sth = database::$dbh -> prepare("SELECT round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM round JOIN game ON round.game_id = game.game_id WHERE round.game_id = :game_id" . $ls . ";");
+		$sth = database::$dbh -> prepare("SELECT `round`.`round_id`, `round`.`name`, `round`.`game_id`, `round`.`round_sortkey`, `round`.`round_state`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `round` JOIN `game` ON `round`.`game_id` = `game`.`game_id` WHERE round.game_id = :game_id" . self::SORT_CLAUSE . $ls . ";");
 		$sth -> execute(array('game_id' => $game_id));
+		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
+		$ret = array();
+		foreach($rows as $row) {
+			$assoc = self::row_to_assoc($row);
+			$ret[] = new round_model($assoc);
+		}
+		return $ret;
+	}
+
+	/**
+	 * Simple search within name field
+	 * 
+	 * @param int $start Row to begin from. Default 0 (begin from start)
+	 * @param int $limit Maximum number of rows to retrieve. Default -1 (no limit)
+	 */
+	public static function search_by_name($search, $start = 0, $limit = -1) {
+		$ls = "";
+		$start = (int)$start;
+		$limit = (int)$limit;
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
+		}
+		$sth = database::$dbh -> prepare("SELECT `round`.`round_id`, `round`.`name`, `round`.`game_id`, `round`.`round_sortkey`, `round`.`round_state`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `round` JOIN `game` ON `round`.`game_id` = `game`.`game_id` WHERE name LIKE :search" . self::SORT_CLAUSE . $ls . ";");
+		$sth -> execute(array('search' => "%".$search."%"));
 		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
 		$ret = array();
 		foreach($rows as $row) {

@@ -23,6 +23,9 @@ class person_table_model {
 	public $person;
 	public $team;
 
+	/* Sort clause to add when listing rows from this table */
+	const SORT_CLAUSE = " ORDER BY `person_table`.`round_id`, `person_table`.`person_id`";
+
 	/**
 	 * Initialise and load related tables
 	 */
@@ -39,7 +42,7 @@ class person_table_model {
 	 * @return array
 	 */
 	public function __construct(array $fields = array()) {
-/* Initialise everything as blank to avoid tripping up the permissions fitlers */
+		/* Initialise everything as blank to avoid tripping up the permissions fitlers */
 		$this -> round_id = '';
 		$this -> person_id = '';
 		$this -> team_id = '';
@@ -219,13 +222,13 @@ class person_table_model {
 		$data['round_id'] = $this -> get_round_id();
 		$data['person_id'] = $this -> get_person_id();
 		foreach($this -> model_variables_changed as $col => $changed) {
-			$fieldset[] = "$col = :$col";
+			$fieldset[] = "`$col` = :$col";
 			$data[$col] = $everything[$col];
 		}
 		$fields = implode(", ", $fieldset);
 
 		/* Execute query */
-		$sth = database::$dbh -> prepare("UPDATE person_table SET $fields WHERE round_id = :round_id AND person_id = :person_id");
+		$sth = database::$dbh -> prepare("UPDATE `person_table` SET $fields WHERE `person_table`.`round_id` = :round_id AND `person_table`.`person_id` = :person_id");
 		$sth -> execute($data);
 	}
 
@@ -242,7 +245,7 @@ class person_table_model {
 		$data = array();
 		$everything = $this -> to_array();
 		foreach($this -> model_variables_set as $col => $changed) {
-			$fieldset[] = $col;
+			$fieldset[] = "`$col`";
 			$fieldset_colon[] = ":$col";
 			$data[$col] = $everything[$col];
 		}
@@ -250,7 +253,7 @@ class person_table_model {
 		$vals = implode(", ", $fieldset_colon);
 
 		/* Execute query */
-		$sth = database::$dbh -> prepare("INSERT INTO person_table ($fields) VALUES ($vals);");
+		$sth = database::$dbh -> prepare("INSERT INTO `person_table` ($fields) VALUES ($vals);");
 		$sth -> execute($data);
 	}
 
@@ -258,7 +261,7 @@ class person_table_model {
 	 * Delete person_table
 	 */
 	public function delete() {
-		$sth = database::$dbh -> prepare("DELETE FROM person_table WHERE round_id = :round_id AND person_id = :person_id");
+		$sth = database::$dbh -> prepare("DELETE FROM `person_table` WHERE `person_table`.`round_id` = :round_id AND `person_table`.`person_id` = :person_id");
 		$data['round_id'] = $this -> get_round_id();
 		$data['person_id'] = $this -> get_person_id();
 		$sth -> execute($data);
@@ -268,7 +271,7 @@ class person_table_model {
 	 * Retrieve by primary key
 	 */
 	public static function get($round_id, $person_id) {
-		$sth = database::$dbh -> prepare("SELECT person_table.round_id, person_table.person_id, person_table.team_id, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, person.person_id, person.person_name, person.game_id, team.team_id, team.team_code, team.game_id, team.team_name, game.game_id, game.game_name, game.game_state, game.game_code FROM person_table JOIN round ON person_table.round_id = round.round_id JOIN person ON person_table.person_id = person.person_id JOIN team ON person_table.team_id = team.team_id JOIN game ON round.game_id = game.game_id WHERE person_table.round_id = :round_id AND person_table.person_id = :person_id;");
+		$sth = database::$dbh -> prepare("SELECT `person_table`.`round_id`, `person_table`.`person_id`, `person_table`.`team_id`, `round`.`round_id`, `round`.`name`, `round`.`game_id`, `round`.`round_sortkey`, `round`.`round_state`, `person`.`person_id`, `person`.`person_name`, `person`.`game_id`, `team`.`team_id`, `team`.`team_code`, `team`.`game_id`, `team`.`team_name`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM person_table JOIN `round` ON `person_table`.`round_id` = `round`.`round_id` JOIN `person` ON `person_table`.`person_id` = `person`.`person_id` JOIN `team` ON `person_table`.`team_id` = `team`.`team_id` JOIN `game` ON `round`.`game_id` = `game`.`game_id` WHERE `person_table`.`round_id` = :round_id AND `person_table`.`person_id` = :person_id;");
 		$sth -> execute(array('round_id' => $round_id, 'person_id' => $person_id));
 		$row = $sth -> fetch(PDO::FETCH_NUM);
 		if($row === false){
@@ -288,10 +291,10 @@ class person_table_model {
 		$ls = "";
 		$start = (int)$start;
 		$limit = (int)$limit;
-		if($start > 0 && $limit > 0) {
-			$ls = " LIMIT $start, " . ($start + $limit);
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
 		}
-		$sth = database::$dbh -> prepare("SELECT person_table.round_id, person_table.person_id, person_table.team_id, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, person.person_id, person.person_name, person.game_id, team.team_id, team.team_code, team.game_id, team.team_name, game.game_id, game.game_name, game.game_state, game.game_code FROM person_table JOIN round ON person_table.round_id = round.round_id JOIN person ON person_table.person_id = person.person_id JOIN team ON person_table.team_id = team.team_id JOIN game ON round.game_id = game.game_id" . $ls . ";");
+		$sth = database::$dbh -> prepare("SELECT `person_table`.`round_id`, `person_table`.`person_id`, `person_table`.`team_id`, `round`.`round_id`, `round`.`name`, `round`.`game_id`, `round`.`round_sortkey`, `round`.`round_state`, `person`.`person_id`, `person`.`person_name`, `person`.`game_id`, `team`.`team_id`, `team`.`team_code`, `team`.`game_id`, `team`.`team_name`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `person_table` JOIN `round` ON `person_table`.`round_id` = `round`.`round_id` JOIN `person` ON `person_table`.`person_id` = `person`.`person_id` JOIN `team` ON `person_table`.`team_id` = `team`.`team_id` JOIN `game` ON `round`.`game_id` = `game`.`game_id`" . self::SORT_CLAUSE . $ls . ";");
 		$sth -> execute();
 		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
 		$ret = array();
@@ -312,10 +315,10 @@ class person_table_model {
 		$ls = "";
 		$start = (int)$start;
 		$limit = (int)$limit;
-		if($start > 0 && $limit > 0) {
-			$ls = " LIMIT $start, " . ($start + $limit);
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
 		}
-		$sth = database::$dbh -> prepare("SELECT person_table.round_id, person_table.person_id, person_table.team_id, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, person.person_id, person.person_name, person.game_id, team.team_id, team.team_code, team.game_id, team.team_name, game.game_id, game.game_name, game.game_state, game.game_code FROM person_table JOIN round ON person_table.round_id = round.round_id JOIN person ON person_table.person_id = person.person_id JOIN team ON person_table.team_id = team.team_id JOIN game ON round.game_id = game.game_id WHERE person_table.person_id = :person_id" . $ls . ";");
+		$sth = database::$dbh -> prepare("SELECT `person_table`.`round_id`, `person_table`.`person_id`, `person_table`.`team_id`, `round`.`round_id`, `round`.`name`, `round`.`game_id`, `round`.`round_sortkey`, `round`.`round_state`, `person`.`person_id`, `person`.`person_name`, `person`.`game_id`, `team`.`team_id`, `team`.`team_code`, `team`.`game_id`, `team`.`team_name`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `person_table` JOIN `round` ON `person_table`.`round_id` = `round`.`round_id` JOIN `person` ON `person_table`.`person_id` = `person`.`person_id` JOIN `team` ON `person_table`.`team_id` = `team`.`team_id` JOIN `game` ON `round`.`game_id` = `game`.`game_id` WHERE person_table.person_id = :person_id" . self::SORT_CLAUSE . $ls . ";");
 		$sth -> execute(array('person_id' => $person_id));
 		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
 		$ret = array();
@@ -336,10 +339,10 @@ class person_table_model {
 		$ls = "";
 		$start = (int)$start;
 		$limit = (int)$limit;
-		if($start > 0 && $limit > 0) {
-			$ls = " LIMIT $start, " . ($start + $limit);
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
 		}
-		$sth = database::$dbh -> prepare("SELECT person_table.round_id, person_table.person_id, person_table.team_id, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, person.person_id, person.person_name, person.game_id, team.team_id, team.team_code, team.game_id, team.team_name, game.game_id, game.game_name, game.game_state, game.game_code FROM person_table JOIN round ON person_table.round_id = round.round_id JOIN person ON person_table.person_id = person.person_id JOIN team ON person_table.team_id = team.team_id JOIN game ON round.game_id = game.game_id WHERE person_table.team_id = :team_id" . $ls . ";");
+		$sth = database::$dbh -> prepare("SELECT `person_table`.`round_id`, `person_table`.`person_id`, `person_table`.`team_id`, `round`.`round_id`, `round`.`name`, `round`.`game_id`, `round`.`round_sortkey`, `round`.`round_state`, `person`.`person_id`, `person`.`person_name`, `person`.`game_id`, `team`.`team_id`, `team`.`team_code`, `team`.`game_id`, `team`.`team_name`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `person_table` JOIN `round` ON `person_table`.`round_id` = `round`.`round_id` JOIN `person` ON `person_table`.`person_id` = `person`.`person_id` JOIN `team` ON `person_table`.`team_id` = `team`.`team_id` JOIN `game` ON `round`.`game_id` = `game`.`game_id` WHERE person_table.team_id = :team_id" . self::SORT_CLAUSE . $ls . ";");
 		$sth -> execute(array('team_id' => $team_id));
 		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
 		$ret = array();

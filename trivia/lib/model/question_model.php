@@ -25,6 +25,11 @@ class question_model {
 	 */
 	private $question_state;
 
+	/**
+	 * @var string question_answer
+	 */
+	private $question_answer;
+
 	private $model_variables_changed; // Only variables which have been changed
 	private $model_variables_set; // All variables which have been set (initially or with a setter)
 
@@ -33,6 +38,9 @@ class question_model {
 
 	/* Child tables */
 	public $list_answer;
+
+	/* Sort clause to add when listing rows from this table */
+	const SORT_CLAUSE = " ORDER BY `question`.`question_id`";
 
 	/**
 	 * Initialise and load related tables
@@ -51,12 +59,13 @@ class question_model {
 	 * @return array
 	 */
 	public function __construct(array $fields = array()) {
-/* Initialise everything as blank to avoid tripping up the permissions fitlers */
+		/* Initialise everything as blank to avoid tripping up the permissions fitlers */
 		$this -> question_id = '';
 		$this -> round_id = '';
 		$this -> question_text = '';
 		$this -> question_sortkey = '';
 		$this -> question_state = '';
+		$this -> question_answer = '';
 
 		if(isset($fields['question.question_id'])) {
 			$this -> set_question_id($fields['question.question_id']);
@@ -72,6 +81,9 @@ class question_model {
 		}
 		if(isset($fields['question.question_state'])) {
 			$this -> set_question_state($fields['question.question_state']);
+		}
+		if(isset($fields['question.question_answer'])) {
+			$this -> set_question_answer($fields['question.question_answer']);
 		}
 
 		$this -> model_variables_changed = array();
@@ -90,7 +102,8 @@ class question_model {
 			'round_id' => $this -> round_id,
 			'question_text' => $this -> question_text,
 			'question_sortkey' => $this -> question_sortkey,
-			'question_state' => $this -> question_state);
+			'question_state' => $this -> question_state,
+			'question_answer' => $this -> question_answer);
 		return $values;
 	}
 
@@ -135,15 +148,16 @@ class question_model {
 			"question.question_text" => $row[2],
 			"question.question_sortkey" => $row[3],
 			"question.question_state" => $row[4],
-			"round.round_id" => $row[5],
-			"round.name" => $row[6],
-			"round.game_id" => $row[7],
-			"round.round_sortkey" => $row[8],
-			"round.round_state" => $row[9],
-			"game.game_id" => $row[10],
-			"game.game_name" => $row[11],
-			"game.game_state" => $row[12],
-			"game.game_code" => $row[13]);
+			"question.question_answer" => $row[5],
+			"round.round_id" => $row[6],
+			"round.name" => $row[7],
+			"round.game_id" => $row[8],
+			"round.round_sortkey" => $row[9],
+			"round.round_state" => $row[10],
+			"game.game_id" => $row[11],
+			"game.game_name" => $row[12],
+			"game.game_state" => $row[13],
+			"game.game_code" => $row[14]);
 		return $values;
 	}
 
@@ -276,6 +290,30 @@ class question_model {
 	}
 
 	/**
+	 * Get question_answer
+	 * 
+	 * @return string
+	 */
+	public function get_question_answer() {
+		if(!isset($this -> model_variables_set['question_answer'])) {
+			throw new Exception("question.question_answer has not been initialised.");
+		}
+		return $this -> question_answer;
+	}
+
+	/**
+	 * Set question_answer
+	 * 
+	 * @param string $question_answer
+	 */
+	public function set_question_answer($question_answer) {
+		// TODO: Add TEXT validation to question.question_answer
+		$this -> question_answer = $question_answer;
+		$this -> model_variables_changed['question_answer'] = true;
+		$this -> model_variables_set['question_answer'] = true;
+	}
+
+	/**
 	 * Update question
 	 */
 	public function update() {
@@ -288,13 +326,13 @@ class question_model {
 		$everything = $this -> to_array();
 		$data['question_id'] = $this -> get_question_id();
 		foreach($this -> model_variables_changed as $col => $changed) {
-			$fieldset[] = "$col = :$col";
+			$fieldset[] = "`$col` = :$col";
 			$data[$col] = $everything[$col];
 		}
 		$fields = implode(", ", $fieldset);
 
 		/* Execute query */
-		$sth = database::$dbh -> prepare("UPDATE question SET $fields WHERE question_id = :question_id");
+		$sth = database::$dbh -> prepare("UPDATE `question` SET $fields WHERE `question`.`question_id` = :question_id");
 		$sth -> execute($data);
 	}
 
@@ -311,7 +349,7 @@ class question_model {
 		$data = array();
 		$everything = $this -> to_array();
 		foreach($this -> model_variables_set as $col => $changed) {
-			$fieldset[] = $col;
+			$fieldset[] = "`$col`";
 			$fieldset_colon[] = ":$col";
 			$data[$col] = $everything[$col];
 		}
@@ -319,7 +357,7 @@ class question_model {
 		$vals = implode(", ", $fieldset_colon);
 
 		/* Execute query */
-		$sth = database::$dbh -> prepare("INSERT INTO question ($fields) VALUES ($vals);");
+		$sth = database::$dbh -> prepare("INSERT INTO `question` ($fields) VALUES ($vals);");
 		$sth -> execute($data);
 		$this -> set_question_id(database::$dbh->lastInsertId());
 	}
@@ -328,7 +366,7 @@ class question_model {
 	 * Delete question
 	 */
 	public function delete() {
-		$sth = database::$dbh -> prepare("DELETE FROM question WHERE question_id = :question_id");
+		$sth = database::$dbh -> prepare("DELETE FROM `question` WHERE `question`.`question_id` = :question_id");
 		$data['question_id'] = $this -> get_question_id();
 		$sth -> execute($data);
 	}
@@ -348,7 +386,7 @@ class question_model {
 	 * Retrieve by primary key
 	 */
 	public static function get($question_id) {
-		$sth = database::$dbh -> prepare("SELECT question.question_id, question.round_id, question.question_text, question.question_sortkey, question.question_state, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM question JOIN round ON question.round_id = round.round_id JOIN game ON round.game_id = game.game_id WHERE question.question_id = :question_id;");
+		$sth = database::$dbh -> prepare("SELECT `question`.`question_id`, `question`.`round_id`, `question`.`question_text`, `question`.`question_sortkey`, `question`.`question_state`, `question`.`question_answer`, `round`.`round_id`, `round`.`name`, `round`.`game_id`, `round`.`round_sortkey`, `round`.`round_state`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM question JOIN `round` ON `question`.`round_id` = `round`.`round_id` JOIN `game` ON `round`.`game_id` = `game`.`game_id` WHERE `question`.`question_id` = :question_id;");
 		$sth -> execute(array('question_id' => $question_id));
 		$row = $sth -> fetch(PDO::FETCH_NUM);
 		if($row === false){
@@ -362,7 +400,7 @@ class question_model {
 	 * Retrieve by question_sort
 	 */
 	public static function get_by_question_sort($round_id, $question_sortkey) {
-		$sth = database::$dbh -> prepare("SELECT question.question_id, question.round_id, question.question_text, question.question_sortkey, question.question_state, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM question JOIN round ON question.round_id = round.round_id JOIN game ON round.game_id = game.game_id WHERE question.round_id = :round_id AND question.question_sortkey = :question_sortkey;");
+		$sth = database::$dbh -> prepare("SELECT `question`.`question_id`, `question`.`round_id`, `question`.`question_text`, `question`.`question_sortkey`, `question`.`question_state`, `question`.`question_answer`, `round`.`round_id`, `round`.`name`, `round`.`game_id`, `round`.`round_sortkey`, `round`.`round_state`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM question JOIN `round` ON `question`.`round_id` = `round`.`round_id` JOIN `game` ON `round`.`game_id` = `game`.`game_id` WHERE `question`.`round_id` = :round_id AND `question`.`question_sortkey` = :question_sortkey;");
 		$sth -> execute(array('round_id' => $round_id, 'question_sortkey' => $question_sortkey));
 		$row = $sth -> fetch(PDO::FETCH_NUM);
 		if($row === false){
@@ -382,10 +420,10 @@ class question_model {
 		$ls = "";
 		$start = (int)$start;
 		$limit = (int)$limit;
-		if($start > 0 && $limit > 0) {
-			$ls = " LIMIT $start, " . ($start + $limit);
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
 		}
-		$sth = database::$dbh -> prepare("SELECT question.question_id, question.round_id, question.question_text, question.question_sortkey, question.question_state, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM question JOIN round ON question.round_id = round.round_id JOIN game ON round.game_id = game.game_id" . $ls . ";");
+		$sth = database::$dbh -> prepare("SELECT `question`.`question_id`, `question`.`round_id`, `question`.`question_text`, `question`.`question_sortkey`, `question`.`question_state`, `question`.`question_answer`, `round`.`round_id`, `round`.`name`, `round`.`game_id`, `round`.`round_sortkey`, `round`.`round_state`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `question` JOIN `round` ON `question`.`round_id` = `round`.`round_id` JOIN `game` ON `round`.`game_id` = `game`.`game_id`" . self::SORT_CLAUSE . $ls . ";");
 		$sth -> execute();
 		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
 		$ret = array();
@@ -406,11 +444,59 @@ class question_model {
 		$ls = "";
 		$start = (int)$start;
 		$limit = (int)$limit;
-		if($start > 0 && $limit > 0) {
-			$ls = " LIMIT $start, " . ($start + $limit);
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
 		}
-		$sth = database::$dbh -> prepare("SELECT question.question_id, question.round_id, question.question_text, question.question_sortkey, question.question_state, round.round_id, round.name, round.game_id, round.round_sortkey, round.round_state, game.game_id, game.game_name, game.game_state, game.game_code FROM question JOIN round ON question.round_id = round.round_id JOIN game ON round.game_id = game.game_id WHERE question.round_id = :round_id" . $ls . ";");
+		$sth = database::$dbh -> prepare("SELECT `question`.`question_id`, `question`.`round_id`, `question`.`question_text`, `question`.`question_sortkey`, `question`.`question_state`, `question`.`question_answer`, `round`.`round_id`, `round`.`name`, `round`.`game_id`, `round`.`round_sortkey`, `round`.`round_state`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `question` JOIN `round` ON `question`.`round_id` = `round`.`round_id` JOIN `game` ON `round`.`game_id` = `game`.`game_id` WHERE question.round_id = :round_id" . self::SORT_CLAUSE . $ls . ";");
 		$sth -> execute(array('round_id' => $round_id));
+		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
+		$ret = array();
+		foreach($rows as $row) {
+			$assoc = self::row_to_assoc($row);
+			$ret[] = new question_model($assoc);
+		}
+		return $ret;
+	}
+
+	/**
+	 * Simple search within question_text field
+	 * 
+	 * @param int $start Row to begin from. Default 0 (begin from start)
+	 * @param int $limit Maximum number of rows to retrieve. Default -1 (no limit)
+	 */
+	public static function search_by_question_text($search, $start = 0, $limit = -1) {
+		$ls = "";
+		$start = (int)$start;
+		$limit = (int)$limit;
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
+		}
+		$sth = database::$dbh -> prepare("SELECT `question`.`question_id`, `question`.`round_id`, `question`.`question_text`, `question`.`question_sortkey`, `question`.`question_state`, `question`.`question_answer`, `round`.`round_id`, `round`.`name`, `round`.`game_id`, `round`.`round_sortkey`, `round`.`round_state`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `question` JOIN `round` ON `question`.`round_id` = `round`.`round_id` JOIN `game` ON `round`.`game_id` = `game`.`game_id` WHERE question_text LIKE :search" . self::SORT_CLAUSE . $ls . ";");
+		$sth -> execute(array('search' => "%".$search."%"));
+		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
+		$ret = array();
+		foreach($rows as $row) {
+			$assoc = self::row_to_assoc($row);
+			$ret[] = new question_model($assoc);
+		}
+		return $ret;
+	}
+
+	/**
+	 * Simple search within question_answer field
+	 * 
+	 * @param int $start Row to begin from. Default 0 (begin from start)
+	 * @param int $limit Maximum number of rows to retrieve. Default -1 (no limit)
+	 */
+	public static function search_by_question_answer($search, $start = 0, $limit = -1) {
+		$ls = "";
+		$start = (int)$start;
+		$limit = (int)$limit;
+		if($start >= 0 && $limit > 0) {
+			$ls = " LIMIT $start, $limit";
+		}
+		$sth = database::$dbh -> prepare("SELECT `question`.`question_id`, `question`.`round_id`, `question`.`question_text`, `question`.`question_sortkey`, `question`.`question_state`, `question`.`question_answer`, `round`.`round_id`, `round`.`name`, `round`.`game_id`, `round`.`round_sortkey`, `round`.`round_state`, `game`.`game_id`, `game`.`game_name`, `game`.`game_state`, `game`.`game_code` FROM `question` JOIN `round` ON `question`.`round_id` = `round`.`round_id` JOIN `game` ON `round`.`game_id` = `game`.`game_id` WHERE question_answer LIKE :search" . self::SORT_CLAUSE . $ls . ";");
+		$sth -> execute(array('search' => "%".$search."%"));
 		$rows = $sth -> fetchAll(PDO::FETCH_NUM);
 		$ret = array();
 		foreach($rows as $row) {
