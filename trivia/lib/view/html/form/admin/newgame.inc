@@ -9,8 +9,3 @@
 	  </div>
 	</form>
 </div>
-<script>
-$(function(){
-	$("#game-name").focus();
-});
-</script>

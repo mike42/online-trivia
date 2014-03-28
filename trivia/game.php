@@ -5,8 +5,13 @@ core::loadClass("game_model");
 if(isset($_REQUEST['p']) && $_REQUEST['p'] != "") {
 	$game_code = $_REQUEST['p'];
 	if($game = game_model::get_by_game_code($game_code)) {
-		$data['game'] = $game;
-		core::showHTML(array('layout' => 'htmlLayout', 'template' => 'admin/main', $data));
+		if(isset($_GET['projector'])) {
+			core::showHTML(array('layout' => 'htmlLayout', 'template' => 'projector/main', 'game' => $game));
+		} else if(isset($_GET['zen'])) {
+			core::showHTML(array('layout' => 'htmlLayout', 'template' => 'zen/main', 'game' => $game));
+		} else {
+			core::showHTML(array('layout' => 'htmlLayout', 'template' => 'admin/main', 'game' => $game));
+		}
 	} else {
 		fizzle('Game does not exist.', '404');
 	}
@@ -15,11 +20,12 @@ if(isset($_REQUEST['p']) && $_REQUEST['p'] != "") {
 	do {
 		$game_code = core::makeCode();
 	} while($test = game_model::get_by_game_code($game_code));
-	
+
 	$game = new game_model();
 	$game -> set_game_name($game_name);
 	$game -> set_game_code($game_code);
 	$game -> insert();
+	
 	core::redirect("/trivia/game/$game_code");
 	exit(0);
 } else {

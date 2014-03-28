@@ -9,7 +9,7 @@ var game_model = Backbone.Model.extend({
 	}
 });
 var game_collection = Backbone.Collection.extend({
-	url : '/dl/api/game/list_all/',
+	url : '/trivia/api/game/list_all/',
 	model : game_model
 });
 
@@ -24,7 +24,7 @@ var team_model = Backbone.Model.extend({
 	}
 });
 var team_collection = Backbone.Collection.extend({
-	url : '/dl/api/team/list_all/',
+	url : '/trivia/api/team/list_all/',
 	model : team_model
 });
 
@@ -40,7 +40,7 @@ var round_model = Backbone.Model.extend({
 	}
 });
 var round_collection = Backbone.Collection.extend({
-	url : '/dl/api/round/list_all/',
+	url : '/trivia/api/round/list_all/',
 	model : round_model
 });
 
@@ -57,7 +57,7 @@ var question_model = Backbone.Model.extend({
 	}
 });
 var question_collection = Backbone.Collection.extend({
-	url : '/dl/api/question/list_all/',
+	url : '/trivia/api/question/list_all/',
 	model : question_model
 });
 
@@ -71,7 +71,7 @@ var person_model = Backbone.Model.extend({
 	}
 });
 var person_collection = Backbone.Collection.extend({
-	url : '/dl/api/person/list_all/',
+	url : '/trivia/api/person/list_all/',
 	model : person_model
 });
 

@@ -11,16 +11,28 @@
     <title>Trivia</title>
     <link href="/trivia/public/css/bootstrap.min.css" rel="stylesheet">
     <link href="/trivia/public/css/trivia.css" rel="stylesheet">
+<?php
+    if(file_exists(dirname(__FILE__) . "/form/" . $data['template'] . "-header.inc")) {
+		include(dirname(__FILE__) . "/form/" . $data['template'] . "-header.inc");
+    }
+?>
   </head>
 
   <body>
-    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
     <div class="container">
 <?php
-include(dirname(__FILE__) . "/form/" . $data['template'] . ".inc");
+	include(dirname(__FILE__) . "/form/" . $data['template'] . ".inc");
 ?>
     </div>
+    <script src="/trivia/public/js/jquery-1.10.2.min.js"></script>
+   	<script src="/trivia/public/js/underscore-min.js"></script>
+   	<script src="/trivia/public/js/backbone-min.js"></script>
+   	<script src="/trivia/public/js/models.js"></script>
     <script src="/trivia/public/js/bootstrap.min.js"></script>
+	<script>
+<?php
+	include(dirname(__FILE__) . "/form/" . $data['template'] . ".js");
+?></script>
   </body>
 </html>
 

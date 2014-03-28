@@ -1,4 +1,11 @@
-.main-info {
-  padding: 40px 15px;
-  text-align: center;
+html {
+    overflow-y: scroll; 
+}
+
+.page {
+	padding-top: 20px;
+}
+
+h1 a:hover {
+	text-decoration: none;
 }

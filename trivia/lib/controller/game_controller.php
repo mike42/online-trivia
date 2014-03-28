@@ -44,9 +44,9 @@ class game_controller {
 		if(!$game) {
 			return array('error' => 'game not found', 'code' => '404');
 		}
-		// $game -> populate_list_team();
-		// $game -> populate_list_round();
-		// $game -> populate_list_person();
+		$game -> populate_list_team();
+		$game -> populate_list_round();
+		$game -> populate_list_person();
 		return $game -> to_array_filtered($role);
 	}
 

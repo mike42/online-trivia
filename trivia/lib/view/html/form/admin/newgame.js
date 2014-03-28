@@ -1,0 +1,3 @@
+$(function(){
+	$("#game-name").focus();
+});

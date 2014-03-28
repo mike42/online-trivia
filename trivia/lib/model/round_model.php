@@ -35,7 +35,7 @@ class round_model {
 	public $list_question;
 
 	/* Sort clause to add when listing rows from this table */
-	const SORT_CLAUSE = " ORDER BY `round`.`round_id`";
+	const SORT_CLAUSE = " ORDER BY `round`.`round_sortkey`";
 
 	/**
 	 * Initialise and load related tables
