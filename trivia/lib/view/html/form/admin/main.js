@@ -124,8 +124,7 @@ function showRound(round_id) {
 			});
 			db.render();
 			if($('#round-name').val() == "New Round") {
-				// Prompt the user to rename rounds
-				$('#round-name').focus();
+				$('#round-name').focus(); // Prompt the user to rename rounds
 			}
 			
 			$('#round-name').on('change', function() {
@@ -141,11 +140,29 @@ function showRound(round_id) {
 			});
 			
 			$('#round-up').on('click', function() {
-				//
+				round.set({round_sortkey: 'up'});
+				round.save(null, {
+					patch: true,
+					success: function(results) {
+						loadRounds(results.id);
+					},
+					error : function(model, response) {
+						handleFailedRequest(response);
+					}
+				});
 			});
 			
-			$('#round-up').on('click', function() {
-				//
+			$('#round-down').on('click', function() {
+				round.set({round_sortkey: 'down'});
+				round.save(null, {
+					patch: true,
+					success: function(results) {
+						loadRounds(results.id);
+					},
+					error : function(model, response) {
+						handleFailedRequest(response);
+					}
+				});
 			});
 			
 			$('#round-trash').on('click', function() {

@@ -85,7 +85,30 @@ class round_controller {
 			$round -> set_game_id($received['game_id']);
 		}
 		if(isset($received['round_sortkey']) && in_array('round_sortkey', core::$permission[$role]['round']['update'])) {
-			$round -> set_round_sortkey($received['round_sortkey']);
+			$temp = "0";
+			$old = $round -> get_round_sortkey();
+			if($received['round_sortkey'] == $old) {
+				$new = $old;
+			} else if($received['round_sortkey'] == "down") {
+				$new = $old + 1;
+			} else if($received['round_sortkey'] == "up") {
+				$new = $old - 1;
+			} else {
+				return array('error' => 'Can only move rounds up or down', 'code' => '400');
+			}
+			
+			if($new != $old) {
+				/* Perform swap */
+				if(!$replace = round_model::get_by_round_sort($round -> get_game_id(), $new)) {
+					return array('error' => 'Cannot move the round any further', 'code' => '400');
+				}
+				$replace -> set_round_sortkey($temp);
+				$replace -> update();
+				$round -> set_round_sortkey($new);
+				$round -> update();
+				$replace -> set_round_sortkey($old);
+				$replace -> update();
+			}
 		}
 		if(isset($received['round_state']) && in_array('round_state', core::$permission[$role]['round']['update'])) {
 			$round -> set_round_state($received['round_state']);

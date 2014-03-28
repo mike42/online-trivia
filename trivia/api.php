@@ -9,18 +9,20 @@ $config['default']['controller']	= 'Page';
 
 /* Map HTTP reuest types to methods */
 switch($_SERVER['REQUEST_METHOD']) {
-	case 'GET':
-		$config['default']['action']		= 'read';
-		break;
 	case 'POST':
 		$config['default']['action']		= 'create';
 		break;
 	case 'PUT':
+	case 'PATCH':
 		$config['default']['action']		= 'update';
 		break;
 	case 'DELETE':
 		$config['default']['action']		= 'delete';
 		break;	
+	default:
+	case 'GET':
+		$config['default']['action']		= 'read';
+		break;
 }
 $config['default']['arg']		= array('home');
 $config['default']['format']		= 'html';
