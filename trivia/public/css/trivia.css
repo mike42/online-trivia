@@ -9,3 +9,7 @@ html {
 h1 a:hover {
 	text-decoration: none;
 }
+
+#round-list {
+	border-right: 1px solid #ddd;
+}

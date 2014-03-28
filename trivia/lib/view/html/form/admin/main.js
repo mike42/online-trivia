@@ -42,6 +42,19 @@ var AdminMain = Backbone.Router.extend({
 var appRouter = new AdminMain();
 Backbone.history.start();
 
+function handleFailedRequest(response) {
+	var responseObj = $.parseJSON(response.responseText);
+	$('#errmsg').text(responseObj.error);
+	$('#errbox').show(300);
+}
+
+function errClose() {
+	$('#errbox').hide(300);
+}
+
+/**
+ * Code to deal with Rounds
+ */
 var RoundListView = Backbone.View.extend({
 	collection : null,
 	el : '#round-list',
@@ -55,17 +68,18 @@ var RoundListView = Backbone.View.extend({
 	}
 });
 
-function handleFailedRequest(response) {
-	var responseObj = $.parseJSON(response.responseText);
-	$('#errmsg').text(responseObj.error);
-	$('#errbox').show(300);
-}
+var RoundView = Backbone.View.extend({
+	model: round_model,
+	el: '#round-box',
+	template: _.template($('#template-round').html()),
 
-function errClose() {
-	$('#errbox').hide(300);
-}
+	render : function() {
+		this.$el.html(this.template(this.model.toJSON()));
+		return this;
+	}
+});
 
-function loadRounds() {
+function loadRounds(highlight) {
 	var rounds = new round_collection();
 	rounds.fetch({
 		url: '/trivia/api/round/list_by_game_id/' + game_id,
@@ -74,6 +88,9 @@ function loadRounds() {
 				collection : rounds
 			});
 			db.render();
+			if(typeof highlight !== 'undefined') {
+				showRound(highlight);
+			}
 		},
 		error : function(model, response) {
 			handleFailedRequest(response);
@@ -84,8 +101,8 @@ function loadRounds() {
 function newRound() {
 	var round = new round_model({name: "New Round", game_id: game_id, sortkey: 0});
 	round.save(null, {
-		success : function(results) {
-			loadRounds();
+		success : function(round) {
+			loadRounds(round.id);
 		},
 		error : function(model, response) {
 			handleFailedRequest(response);
@@ -94,3 +111,43 @@ function newRound() {
 	
 	return false;
 }
+
+function showRound(round_id) {
+	$('#round-list li').removeClass('active');
+	$('#roundpill-' + round_id).addClass('active');
+	
+	var round = new round_model({round_id: round_id});
+	round.fetch({
+		success : function(results) {
+			var db = new RoundView({
+				model: round
+			});
+			db.render();
+			if($('#round-name').val() == "New Round") {
+				// Prompt the user to rename rounds
+				$('#round-name').focus();
+			}
+			
+			$('#round-name').on('change', function() {
+				round.set({name: $('#round-name').val()});
+				round.save(null, {
+					success: function(results) {
+						loadRounds(results.id);
+						showRound(results.id);
+					},
+					error : function(model, response) {
+						handleFailedRequest(response);
+					}
+				});
+			});
+		},
+		error : function(model, response) {
+			handleFailedRequest(response);
+		}
+	});
+	
+	return false;
+}
+
+
+

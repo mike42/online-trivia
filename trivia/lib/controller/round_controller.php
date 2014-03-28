@@ -58,7 +58,7 @@ class round_controller {
 		if(!$round) {
 			return array('error' => 'round not found', 'code' => '404');
 		}
-		// $round -> populate_list_question();
+		$round -> populate_list_question();
 		return $round -> to_array_filtered($role);
 	}
 
@@ -160,7 +160,7 @@ class round_controller {
 		}
 	}
 	
-	public static function list_by_game_id($game_id, $page = 1, $itemspp = 20) {
+	public static function list_by_game_id($game_id, $page = 0, $itemspp = 0) {
 		/* Check permission */
 		$role = session::getRole();
 		if(!isset(core::$permission[$role]['round']['read']) || count(core::$permission[$role]['round']['read']) == 0) {

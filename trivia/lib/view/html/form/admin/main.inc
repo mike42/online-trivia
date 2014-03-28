@@ -57,6 +57,7 @@
 				<ul id="round-list" class="nav nav-pills nav-stacked">
 				</ul>
 			</div>
+			<div class="col-sm-8" id="round-box"></div>
 		</div>
 	</div>
 </div>
