@@ -133,13 +133,28 @@ function showRound(round_id) {
 				round.save(null, {
 					success: function(results) {
 						loadRounds(results.id);
-						showRound(results.id);
 					},
 					error : function(model, response) {
 						handleFailedRequest(response);
 					}
 				});
 			});
+			
+			$('#round-up').on('click', function() {
+				//
+			});
+			
+			$('#round-up').on('click', function() {
+				//
+			});
+			
+			$('#round-trash').on('click', function() {
+				if(confirm('Delete the round?')) {
+					round.destroy();
+					loadRounds();
+				}
+			});
+			
 		},
 		error : function(model, response) {
 			handleFailedRequest(response);

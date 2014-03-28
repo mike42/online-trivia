@@ -126,7 +126,9 @@ class round_controller {
 
 		/* Delete it */
 		try {
+			$game = $round -> game;
 			$round -> delete();
+			self::correct_sortkeys($game);
 			return array('success' => 'yes');
 		} catch(Exception $e) {
 			return array('error' => 'Failed to delete', 'code' => '500');
@@ -184,6 +186,16 @@ class round_controller {
 			return $ret;
 		} catch(Exception $e) {
 			return array('error' => 'Failed to list', 'code' => '500');
+		}
+	}
+	
+	private static function correct_sortkeys(game_model $game) {
+		$game -> populate_list_round();
+		foreach($game -> list_round as $id => $round) {
+			if($id + 1 < $round -> get_round_sortkey()) {
+				$round -> set_round_sortkey($id + 1);
+				$round -> update();
+			}	
 		}
 	}
 }
