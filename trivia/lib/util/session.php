@@ -16,7 +16,7 @@ class session {
 		if(isset($_SESSION['role'])) {
 			return $_SESSION['role'];
 		}
-		return "anon";
+		return "user";
 	}
 
 	/**

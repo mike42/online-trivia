@@ -133,7 +133,7 @@ class core {
 		exit(0);
 	}
 
-	public function redirect($location) {
+	public static function redirect($location) {
 		header("location: $location");
 	}
 	
@@ -145,6 +145,20 @@ class core {
 	
 	public static function showHTML($data) {
 		include(dirname(__FILE__) . "/view/html/" . $data['layout'] . ".inc");
+	}
+	
+	/**
+	 * Generate a game code
+	 * 
+	 * @return string
+	 */
+	public static function makeCode($len = 6) {
+		$chars = "abcdefghijklmnopqrstuvwxyz1234567890";
+		$code = "";
+		for($i = 0; $i < $len; $i++) {
+			$code .= substr($chars, rand(0, strlen($chars) - 1), 1);
+		}
+		return $code;
 	}
 }
 core::init();
