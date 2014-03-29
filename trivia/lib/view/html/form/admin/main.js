@@ -169,9 +169,15 @@ function showRound(round_id) {
 			
 			$('#round-trash').on('click', function() {
 				if(confirm('Delete the round?')) {
-					round.destroy();
 					$('#round-box').empty();
-					loadRounds();
+					round.destroy({
+						success: function(model, response) {
+							loadRounds();
+						},							
+						error: function(model, response) {
+							handleFailedRequest(response);
+						}
+					});
 				}
 			});
 			
@@ -218,6 +224,11 @@ function addQuestionSave() {
 	});
 	
 	$('#addQuestion').modal('hide');
+}
+
+function editQuestion(question_id) {
+	alert(question_id);
+	return false;
 }
 
 /**
@@ -277,6 +288,11 @@ function loadTeams() {
 	});
 }
 
+function editTeam(team_id) {
+	alert(team_id);
+	return false;
+}
+
 /**
  * Code to deal with People
  */
@@ -332,4 +348,56 @@ function loadPeople() {
 			handleFailedRequest(response);
 		}
 	});
+}
+
+function editPerson(person_id) {
+	var person = new person_model({person_id: person_id});
+	person.fetch({
+		success: function(results) {
+			$('#editPersonId').val(person_id);
+			$('#editPersonName').val(person.get('person_name'));
+			$('#editPerson').modal();
+		},
+		error : function(model, response) {
+			handleFailedRequest(response);
+		}
+	});
+	return false;
+}
+
+function editPersonDelete() {
+	if(confirm('Delete person?')) {
+		var person = new person_model({person_id: $('#editPersonId').val()});
+		person.destroy({
+			success: function(model, response) {
+				$('#editPerson').modal('hide');
+				loadPeople();
+			},							
+			error: function(model, response) {
+				handleFailedRequest(response);
+			}
+		});
+	}
+}
+
+function editPersonSave() {
+	var person = new person_model({person_id: $('#editPersonId').val()});
+	person.fetch({
+		success: function(results) {
+			person.set('person_name', $('#editPersonName').val());
+			person.save(null, {
+				success : function(person) {
+					$('#editPerson').modal('hide');
+					loadPeople();
+				},
+				error : function(model, response) {
+					handleFailedRequest(response);
+				}
+			});
+		},
+		error : function(model, response) {
+			handleFailedRequest(response);
+		}
+	});
+	return false;
 }

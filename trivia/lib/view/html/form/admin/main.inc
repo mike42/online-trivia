@@ -40,7 +40,7 @@
 		</div>
 	</div>
 
-	<div class="panel panel-danger">
+	<div class="panel panel-warning">
 		<div class="panel-heading">
 			<h3 class="panel-title">Reset game</h3>
 		</div>
@@ -48,7 +48,7 @@
 			<p>Clear out all submitted answers so you can start again.</p>
 			<form class="navbar-form navbar-left" action="" method="post">
 				<input type="hidden" name="action" value="reset" />
-				<button type="submit" class="btn btn-danger">Reset Game</button>
+				<button type="submit" class="btn btn-warning">Reset Game</button>
 			</form>
 		</div>
 	</div>
@@ -116,6 +116,32 @@
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 				<button type="button" class="btn btn-primary" onClick="addPeopleSave();">Save changes</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="modal fade" id="editPerson" tabindex="-1">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+				<h4 class="modal-title">Edit Person</h4>
+			</div>
+			<div class="modal-body">
+				<form>
+					<input type="hidden" id="editPersonId" value=""/>
+					<div class="form-group">
+						<label>Name</label>
+						<input class="form-control" type="text" id="editPersonName" placeholder="Name" />
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" onClick="editPersonDelete();"><span class="glyphicon glyphicon-trash"></span></button>
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary" onClick="editPersonSave();">Save changes</button>
 			</div>
 		</div>
 	</div>

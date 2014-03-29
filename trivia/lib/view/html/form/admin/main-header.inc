@@ -15,13 +15,19 @@
 
 <script type="text/template" id="template-person-li">
 <% _.each(person_list, function(person)  { %>
-	<li class="list-group-item"><%= _.escape(person.person_name) %></li>
+	<li class="list-group-item">
+		<a class="btn btn-default btn-xs" style="float: right" href="#" onClick="return editPerson(<%= _.escape(person.person_id) %>)"><span class="glyphicon glyphicon-edit"></span></a>
+		<%= _.escape(person.person_name) %>
+	</li>
 <% }); %>
 </script>
 
 <script type="text/template" id="template-team-li">
 <% _.each(team_list, function(team)  { %>
-	<li class="list-group-item"><%= _.escape(team.team_name) %></li>
+	<li class="list-group-item">
+		<a class="btn btn-default btn-xs" style="float: right" href="#" onClick="return editTeam(<%= _.escape(team.team_id) %>)"><span class="glyphicon glyphicon-edit"></span></a>
+		<%= _.escape(team.team_name) %>
+	</li>
 <% }); %>
 </script>
 
@@ -40,7 +46,9 @@
 	<div class="panel-heading">Questions</div>
 <ul class="list-group">
 	<% _.each(question, function(question)  { %>
-	<li class="list-group-item"><b><%= escape(question.question_sortkey) %>.</b> <%= _.escape(question.question_text) %><br/>
+	<li class="list-group-item">
+	<a class="btn btn-default btn-xs" style="float: right" href="#" onClick="return editQuestion(<%= _.escape(question.question_id) %>)"><span class="glyphicon glyphicon-edit"></span></a>
+	<b><%= escape(question.question_sortkey) %>.</b> <%= _.escape(question.question_text) %><br/>
 	A. <%= _.escape(question.question_answer) %>.</li>
 	<% }); %>
 	<li class="list-group-item"><a class="btn btn-default" href="#" onClick="return addQuestion(<%=  _.escape(round_id) %>)"><span class="glyphicon glyphicon-plus"></span> Add A Question</a></li>
