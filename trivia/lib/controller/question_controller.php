@@ -28,6 +28,15 @@ class question_controller {
 			return array('error' => 'question is invalid because related round does not exist', 'code' => '400');
 		}
 
+		/* Find suitable sortkey */
+		$question_sortkey = $question -> get_question_sortkey();
+		if($question_sortkey == 0) {
+			do {
+				$question_sortkey++;
+			} while($test = question_model::get_by_question_sort($question -> get_round_id(), $question_sortkey));
+			$question -> set_question_sortkey($question_sortkey);
+		}
+		
 		/* Insert new row */
 		try {
 			$question -> insert();
@@ -120,7 +129,10 @@ class question_controller {
 
 		/* Delete it */
 		try {
+			$round = $question -> round;
 			$question -> delete();
+			self::correct_sortkeys($round);
+			
 			return array('success' => 'yes');
 		} catch(Exception $e) {
 			return array('error' => 'Failed to delete', 'code' => '500');
@@ -151,6 +163,16 @@ class question_controller {
 			return $ret;
 		} catch(Exception $e) {
 			return array('error' => 'Failed to list', 'code' => '500');
+		}
+	}
+	
+	private static function correct_sortkeys(round_model $round) {
+		$round -> populate_list_question();
+		foreach($game -> list_question as $id => $question) {
+			if($id + 1 < $question -> get_question_sortkey()) {
+				$question -> set_question_sortkey($id + 1);
+				$question -> update();
+			}
 		}
 	}
 }

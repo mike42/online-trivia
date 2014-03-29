@@ -40,10 +40,10 @@
 	<div class="panel-heading">Questions</div>
 <ul class="list-group">
 	<% _.each(question, function(question)  { %>
-	<li class="list-group-item"><b><%= escape(question.sortkey) %>.</b> <%=escape(question_text)%><br/>
-	A. <%= escape(question.answer) %>.</li>
+	<li class="list-group-item"><b><%= escape(question.question_sortkey) %>.</b> <%= _.escape(question.question_text) %><br/>
+	A. <%= _.escape(question.question_answer) %>.</li>
 	<% }); %>
-	<li class="list-group-item"><a class="btn btn-default"><span class="glyphicon glyphicon-plus"></span> Add A Question</a></li>
+	<li class="list-group-item"><a class="btn btn-default" href="#" onClick="return addQuestion(<%=  _.escape(round_id) %>)"><span class="glyphicon glyphicon-plus"></span> Add A Question</a></li>
 </ul>
 </div>
 </script>

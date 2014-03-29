@@ -185,6 +185,42 @@ function showRound(round_id) {
 }
 
 /**
+ * Code to deal with Questions
+ */
+$('#addQuestion').on('show.bs.modal', function() {
+    $("#addQuestionText").val('');
+    $("#addQuestionAnswer").val('');
+})
+$('#addQuestion').on('shown.bs.modal', function() {
+    $("#addQuestionText").focus();
+})
+
+function addQuestion(round_id) {
+    $("#addQuestionRoundId").val(round_id);
+    $('#addQuestion').modal();
+    return false;
+}
+
+function addQuestionSave() {
+	var round_id = $("#addQuestionRoundId").val();
+	var question = new question_model({
+		round_id: round_id,
+		question_text:  $("#addQuestionText").val(),
+		question_answer: $("#addQuestionAnswer").val()
+	});
+	question.save(null, {
+		success : function(results) {
+			showRound(round_id);
+		},
+		error : function(model, response) {
+			handleFailedRequest(response);
+		}
+	});
+	
+	$('#addQuestion').modal('hide');
+}
+
+/**
  * Code to deal with Teams
  */
 var TeamListView = Backbone.View.extend({
