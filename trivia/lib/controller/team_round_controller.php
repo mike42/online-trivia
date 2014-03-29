@@ -24,11 +24,14 @@ class team_round_controller {
 			$team_round = new team_round_model($init);
 
 		/* Check parent tables */
-		if(!round_model::get($team_round -> get_round_round_id())) {
+		if(!$round = round_model::get($team_round -> get_round_round_id())) {
 			return array('error' => 'team_round is invalid because related round does not exist', 'code' => '400');
 		}
-		if(!team_model::get($team_round -> get_team_team_id())) {
+		if(!$team = team_model::get($team_round -> get_team_team_id())) {
 			return array('error' => 'team_round is invalid because related team does not exist', 'code' => '400');
+		}
+		if($team -> get_game_id() != $round -> get_game_id() || !session::is_game_master($round -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games.', 'code' => '403');
 		}
 
 		/* Insert new row */
@@ -52,6 +55,10 @@ class team_round_controller {
 		if(!$team_round) {
 			return array('error' => 'team_round not found', 'code' => '404');
 		}
+		if(!session::is_game_master($team_round -> round -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games.', 'code' => '403');
+		}
+		
 		return $team_round -> to_array_filtered($role);
 	}
 
@@ -76,13 +83,16 @@ class team_round_controller {
 		}
 
 		/* Check parent tables */
-		if(!round_model::get($team_round -> get_round_round_id())) {
+		if(!$round = round_model::get($team_round -> get_round_round_id())) {
 			return array('error' => 'team_round is invalid because related round does not exist', 'code' => '400');
 		}
-		if(!team_model::get($team_round -> get_team_team_id())) {
+		if(!$team = team_model::get($team_round -> get_team_team_id())) {
 			return array('error' => 'team_round is invalid because related team does not exist', 'code' => '400');
 		}
-
+		if($team -> get_game_id() != $round -> get_game_id() || !session::is_game_master($round -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games.', 'code' => '403');
+		}
+		
 		/* Update the row */
 		try {
 			$team_round -> update();
@@ -104,7 +114,9 @@ class team_round_controller {
 		if(!$team_round) {
 			return array('error' => 'team_round not found', 'code' => '404');
 		}
-
+		if(!session::is_game_master($team_round -> round -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games.', 'code' => '403');
+		}
 
 		/* Delete it */
 		try {
@@ -118,7 +130,7 @@ class team_round_controller {
 	public static function list_all($page = 1, $itemspp = 20) {
 		/* Check permission */
 		$role = session::getRole();
-		if(!isset(core::$permission[$role]['team_round']['read']) || count(core::$permission[$role]['team_round']['read']) == 0) {
+		if(true || !isset(core::$permission[$role]['team_round']['read']) || count(core::$permission[$role]['team_round']['read']) == 0) {
 			return array('error' => 'You do not have permission to do that', 'code' => '403');
 		}
 		if((int)$page < 1 || (int)$itemspp < 1) {

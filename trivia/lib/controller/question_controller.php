@@ -21,11 +21,14 @@ class question_controller {
 				$init["question.$field"] = $received[$field];
 			}
 		}
-			$question = new question_model($init);
+		$question = new question_model($init);
 
 		/* Check parent tables */
-		if(!round_model::get($question -> get_round_id())) {
+		if(!$round = round_model::get($question -> get_round_id())) {
 			return array('error' => 'question is invalid because related round does not exist', 'code' => '400');
+		}
+		if(!session::is_game_master($round -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games', 'code' => '403');
 		}
 
 		/* Find suitable sortkey */
@@ -58,6 +61,9 @@ class question_controller {
 		if(!$question) {
 			return array('error' => 'question not found', 'code' => '404');
 		}
+		if(!session::is_game_member($question -> round -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games', 'code' => '403');
+		}
 		// $question -> populate_list_answer();
 		return $question -> to_array_filtered($role);
 	}
@@ -74,13 +80,13 @@ class question_controller {
 		if(!$question) {
 			return array('error' => 'question not found', 'code' => '404');
 		}
+		if(!session::is_game_master($question -> round -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games', 'code' => '403');
+		}
 
 		/* Find fields to update */
 		$update = false;
 		$received = json_decode(file_get_contents('php://input'), true);
-		if(isset($received['round_id']) && in_array('round_id', core::$permission[$role]['question']['update'])) {
-			$question -> set_round_id($received['round_id']);
-		}
 		if(isset($received['question_text']) && in_array('question_text', core::$permission[$role]['question']['update'])) {
 			$question -> set_question_text($received['question_text']);
 		}
@@ -144,6 +150,9 @@ class question_controller {
 		if(!$question) {
 			return array('error' => 'question not found', 'code' => '404');
 		}
+		if(!session::is_game_master($question -> round -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games', 'code' => '403');
+		}
 
 		/* Check for child rows */
 		$question -> populate_list_answer(0, 1);
@@ -166,7 +175,7 @@ class question_controller {
 	public static function list_all($page = 1, $itemspp = 20) {
 		/* Check permission */
 		$role = session::getRole();
-		if(!isset(core::$permission[$role]['question']['read']) || count(core::$permission[$role]['question']['read']) == 0) {
+		if(true || !isset(core::$permission[$role]['question']['read']) || count(core::$permission[$role]['question']['read']) == 0) {
 			return array('error' => 'You do not have permission to do that', 'code' => '403');
 		}
 		if((int)$page < 1 || (int)$itemspp < 1) {

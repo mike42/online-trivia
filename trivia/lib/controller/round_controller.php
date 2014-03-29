@@ -36,6 +36,9 @@ class round_controller {
 		if(!game_model::get($round -> get_game_id())) {
 			return array('error' => 'round is invalid because related game does not exist', 'code' => '400');
 		}
+		if(!session::is_game_master($round -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games', 'code' => '403');
+		}
 
 		/* Insert new row */
 		try {
@@ -58,6 +61,9 @@ class round_controller {
 		if(!$round) {
 			return array('error' => 'round not found', 'code' => '404');
 		}
+		if(!session::is_game_member($round -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games', 'code' => '403');
+		}
 		$round -> populate_list_question();
 		return $round -> to_array_filtered($role);
 	}
@@ -74,15 +80,15 @@ class round_controller {
 		if(!$round) {
 			return array('error' => 'round not found', 'code' => '404');
 		}
+		if(!session::is_game_master($round -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games', 'code' => '403');
+		}
 
 		/* Find fields to update */
 		$update = false;
 		$received = json_decode(file_get_contents('php://input'), true);
 		if(isset($received['name']) && in_array('name', core::$permission[$role]['round']['update'])) {
 			$round -> set_name($received['name']);
-		}
-		if(isset($received['game_id']) && in_array('game_id', core::$permission[$role]['round']['update'])) {
-			$round -> set_game_id($received['game_id']);
 		}
 		if(isset($received['round_sortkey']) && in_array('round_sortkey', core::$permission[$role]['round']['update'])) {
 			$temp = "0";
@@ -140,7 +146,10 @@ class round_controller {
 		if(!$round) {
 			return array('error' => 'round not found', 'code' => '404');
 		}
-
+		if(!session::is_game_master($round -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games', 'code' => '403');
+		}
+		
 		/* Check for child rows */
 		$round -> populate_list_question(0, 1);
 		if(count($round -> list_question) > 0) {
@@ -161,7 +170,7 @@ class round_controller {
 	public static function list_all($page = 1, $itemspp = 20) {
 		/* Check permission */
 		$role = session::getRole();
-		if(!isset(core::$permission[$role]['round']['read']) || count(core::$permission[$role]['round']['read']) == 0) {
+		if(true || !isset(core::$permission[$role]['round']['read']) || count(core::$permission[$role]['round']['read']) == 0) {
 			return array('error' => 'You do not have permission to do that', 'code' => '403');
 		}
 		if((int)$page < 1 || (int)$itemspp < 1) {
@@ -191,6 +200,10 @@ class round_controller {
 		if(!isset(core::$permission[$role]['round']['read']) || count(core::$permission[$role]['round']['read']) == 0) {
 			return array('error' => 'You do not have permission to do that', 'code' => '403');
 		}
+		if(!session::is_game_member($game_id)) {
+			return array('error' => 'Your permissions do not extend to other games', 'code' => '403');
+		}
+		
 		if((int)$page < 1 || (int)$itemspp < 1) {
 			$start = 0;
 			$limit = -1;

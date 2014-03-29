@@ -27,6 +27,9 @@ class team_controller {
 		if(!game_model::get($team -> get_game_id())) {
 			return array('error' => 'team is invalid because related game does not exist', 'code' => '400');
 		}
+		if(!session::is_game_master($team -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games.', 'code' => '403');
+		}
 		
 		/* Choose new team code */
 		do {
@@ -55,6 +58,10 @@ class team_controller {
 		if(!$team) {
 			return array('error' => 'team not found', 'code' => '404');
 		}
+		if(!session::is_team_member($team_id)) {
+			return array('error' => 'Your permissions do not extend to other games.', 'code' => '403');
+		}
+		
 		// $team -> populate_list_answer();
 		// $team -> populate_list_person_table();
 		// $team -> populate_list_team_round();
@@ -80,9 +87,6 @@ class team_controller {
 		if(isset($received['team_code']) && in_array('team_code', core::$permission[$role]['team']['update'])) {
 			$team -> set_team_code($received['team_code']);
 		}
-		if(isset($received['game_id']) && in_array('game_id', core::$permission[$role]['team']['update'])) {
-			$team -> set_game_id($received['game_id']);
-		}
 		if(isset($received['team_name']) && in_array('team_name', core::$permission[$role]['team']['update'])) {
 			$team -> set_team_name($received['team_name']);
 		}
@@ -90,6 +94,9 @@ class team_controller {
 		/* Check parent tables */
 		if(!game_model::get($team -> get_game_id())) {
 			return array('error' => 'team is invalid because related game does not exist', 'code' => '400');
+		}
+		if(!session::is_game_master($team -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games.', 'code' => '403');
 		}
 
 		/* Update the row */
@@ -112,6 +119,9 @@ class team_controller {
 		$team = team_model::get($team_id);
 		if(!$team) {
 			return array('error' => 'team not found', 'code' => '404');
+		}
+		if(!session::is_game_master($team -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games.', 'code' => '403');
 		}
 
 		/* Check for child rows */
@@ -140,7 +150,7 @@ class team_controller {
 	public static function list_all($page = 1, $itemspp = 20) {
 		/* Check permission */
 		$role = session::getRole();
-		if(!isset(core::$permission[$role]['team']['read']) || count(core::$permission[$role]['team']['read']) == 0) {
+		if(false && !isset(core::$permission[$role]['team']['read']) || count(core::$permission[$role]['team']['read']) == 0) {
 			return array('error' => 'You do not have permission to do that', 'code' => '403');
 		}
 		if((int)$page < 1 || (int)$itemspp < 1) {
@@ -170,6 +180,10 @@ class team_controller {
 		if(!isset(core::$permission[$role]['team']['read']) || count(core::$permission[$role]['team']['read']) == 0) {
 			return array('error' => 'You do not have permission to do that', 'code' => '403');
 		}
+		if(!session::is_game_master($game_id)) {
+			return array('error' => 'Your permissions do not extend to other games.', 'code' => '403');
+		}
+		
 		if((int)$page < 1 || (int)$itemspp < 1) {
 			$start = 0;
 			$limit = -1;

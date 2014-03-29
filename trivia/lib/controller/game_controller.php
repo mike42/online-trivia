@@ -38,6 +38,10 @@ class game_controller {
 		if(!isset(core::$permission[$role]['game']['read']) || count(core::$permission[$role]['game']['read']) == 0) {
 			return array('error' => 'You do not have permission to do that', 'code' => '403');
 		}
+		
+		if(!session::is_game_master($game_id)) {
+			return array('error' => 'Your permissions do not extend to other games.', 'code' => '403');
+		}
 
 		/* Load game */
 		$game = game_model::get($game_id);
@@ -57,6 +61,10 @@ class game_controller {
 			return array('error' => 'You do not have permission to do that', 'code' => '403');
 		}
 
+		if(!session::is_game_master($game_id)) {
+			return array('error' => 'Your permissions do not extend to other games.', 'code' => '403');
+		}
+		
 		/* Load game */
 		$game = game_model::get($game_id);
 		if(!$game) {
@@ -92,6 +100,10 @@ class game_controller {
 			return array('error' => 'You do not have permission to do that', 'code' => '403');
 		}
 
+		if(!session::is_game_master($game_id)) {
+			return array('error' => 'Your permissions do not extend to other games.', 'code' => '403');
+		}
+		
 		/* Load game */
 		$game = game_model::get($game_id);
 		if(!$game) {
@@ -124,7 +136,7 @@ class game_controller {
 	public static function list_all($page = 1, $itemspp = 20) {
 		/* Check permission */
 		$role = session::getRole();
-		if(!isset(core::$permission[$role]['game']['read']) || count(core::$permission[$role]['game']['read']) == 0) {
+		if(true || !isset(core::$permission[$role]['game']['read']) || count(core::$permission[$role]['game']['read']) == 0) {
 			return array('error' => 'You do not have permission to do that', 'code' => '403');
 		}
 		if((int)$page < 1 || (int)$itemspp < 1) {

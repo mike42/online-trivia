@@ -24,14 +24,20 @@ class person_table_controller {
 			$person_table = new person_table_model($init);
 
 		/* Check parent tables */
-		if(!round_model::get($person_table -> get_round_id())) {
+		if(!$round = round_model::get($person_table -> get_round_id())) {
 			return array('error' => 'person_table is invalid because related round does not exist', 'code' => '400');
 		}
-		if(!person_model::get($person_table -> get_person_id())) {
+		if(!$person = person_model::get($person_table -> get_person_id())) {
 			return array('error' => 'person_table is invalid because related person does not exist', 'code' => '400');
 		}
-		if(!team_model::get($person_table -> get_team_id())) {
+		if(!$team = team_model::get($person_table -> get_team_id())) {
 			return array('error' => 'person_table is invalid because related team does not exist', 'code' => '400');
+		}
+		if($round -> get_game_id() != $person -> get_game_id() || $person -> get_game_id() != $team -> get_game_id()) {
+			return array('error' => 'Cannot mix members of different games', 'code' => '403');
+		}
+		if(!session::is_game_member($round -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games', 'code' => '403');
 		}
 
 		/* Insert new row */
@@ -55,6 +61,10 @@ class person_table_controller {
 		if(!$person_table) {
 			return array('error' => 'person_table not found', 'code' => '404');
 		}
+		if(!session::is_game_member($round -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games', 'code' => '403');
+		}
+		
 		return $person_table -> to_array_filtered($role);
 	}
 
@@ -79,14 +89,11 @@ class person_table_controller {
 		}
 
 		/* Check parent tables */
-		if(!round_model::get($person_table -> get_round_id())) {
-			return array('error' => 'person_table is invalid because related round does not exist', 'code' => '400');
-		}
-		if(!person_model::get($person_table -> get_person_id())) {
-			return array('error' => 'person_table is invalid because related person does not exist', 'code' => '400');
-		}
 		if(!team_model::get($person_table -> get_team_id())) {
 			return array('error' => 'person_table is invalid because related team does not exist', 'code' => '400');
+		}
+		if(!session::is_team_member($team -> get_team_id()) || !session::is_game_member($person_table -> round -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games', 'code' => '403');
 		}
 
 		/* Update the row */
@@ -110,7 +117,9 @@ class person_table_controller {
 		if(!$person_table) {
 			return array('error' => 'person_table not found', 'code' => '404');
 		}
-
+		if(!session::is_team_member($person_table -> team -> get_team_id()) || !session::is_game_member($person_table -> round -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games', 'code' => '403');
+		}
 
 		/* Delete it */
 		try {
@@ -124,7 +133,7 @@ class person_table_controller {
 	public static function list_all($page = 1, $itemspp = 20) {
 		/* Check permission */
 		$role = session::getRole();
-		if(!isset(core::$permission[$role]['person_table']['read']) || count(core::$permission[$role]['person_table']['read']) == 0) {
+		if(true || !isset(core::$permission[$role]['person_table']['read']) || count(core::$permission[$role]['person_table']['read']) == 0) {
 			return array('error' => 'You do not have permission to do that', 'code' => '403');
 		}
 		if((int)$page < 1 || (int)$itemspp < 1) {

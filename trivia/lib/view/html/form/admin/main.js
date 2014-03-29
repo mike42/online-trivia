@@ -223,6 +223,9 @@ $('#addQuestion').on('show.bs.modal', function() {
 $('#addQuestion').on('shown.bs.modal', function() {
     $("#addQuestionText").focus();
 })
+$('#editQuestion').on('shown.bs.modal', function() {
+    $("#editQuestionText").focus();
+})
 
 function addQuestion(round_id) {
     $("#addQuestionRoundId").val(round_id);
@@ -388,6 +391,9 @@ $('#addTeam').on('show.bs.modal', function() {
 $('#addTeam').on('shown.bs.modal', function() {
     $("#addTeamName").focus();
 })
+$('#editTeam').on('shown.bs.modal', function() {
+    $("#editTeamName").focus();
+})
 
 function addTeam() {
 	$('#addTeam').modal('show');
@@ -518,6 +524,9 @@ $('#addPerson').on('show.bs.modal', function() {
 })
 $('#addPerson').on('shown.bs.modal', function() {
     $("#addPersonName").focus();
+})
+$('#editPerson').on('shown.bs.modal', function() {
+    $("#editPersonName").focus();
 })
 
 function addPerson() {

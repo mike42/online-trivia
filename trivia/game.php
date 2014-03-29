@@ -1,10 +1,12 @@
 <?php
 require_once(dirname(__FILE__)  . "/lib/core.php");
 core::loadClass("game_model");
+core::loadClass("session");
 
 if(isset($_REQUEST['p']) && $_REQUEST['p'] != "") {
 	$game_code = $_REQUEST['p'];
 	if($game = game_model::get_by_game_code($game_code)) {
+		session::game_login($game_code);
 		if(isset($_GET['projector'])) {
 			core::showHTML(array('layout' => 'htmlLayout', 'template' => 'projector/main', 'game' => $game));
 		} else if(isset($_GET['zen'])) {
@@ -25,7 +27,6 @@ if(isset($_REQUEST['p']) && $_REQUEST['p'] != "") {
 					$game -> reset();
 					break;				
 			}
-			
 			core::showHTML(array('layout' => 'htmlLayout', 'template' => 'admin/main', 'game' => $game));
 		}
 	} else {

@@ -21,7 +21,7 @@ class answer_controller {
 				$init["answer.$field"] = $received[$field];
 			}
 		}
-			$answer = new answer_model($init);
+		$answer = new answer_model($init);
 
 		/* Check parent tables */
 		if(!question_model::get($answer -> get_question_id())) {
@@ -29,6 +29,9 @@ class answer_controller {
 		}
 		if(!team_model::get($answer -> get_team_id())) {
 			return array('error' => 'answer is invalid because related team does not exist', 'code' => '400');
+		}
+		if(!session::is_team_member($answer -> get_team_id())) {
+			return array('error' => 'Your permissions do not extend to other games.', 'code' => '403');
 		}
 
 		/* Insert new row */
@@ -52,6 +55,9 @@ class answer_controller {
 		if(!$answer) {
 			return array('error' => 'answer not found', 'code' => '404');
 		}
+		if(!session::is_game_master($answer -> team -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games.', 'code' => '403');
+		}
 		return $answer -> to_array_filtered($role);
 	}
 
@@ -66,6 +72,9 @@ class answer_controller {
 		$answer = answer_model::get($question_id,$team_id);
 		if(!$answer) {
 			return array('error' => 'answer not found', 'code' => '404');
+		}
+		if(!session::is_game_master($answer -> team -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games.', 'code' => '403');
 		}
 
 		/* Find fields to update */
@@ -110,7 +119,9 @@ class answer_controller {
 		if(!$answer) {
 			return array('error' => 'answer not found', 'code' => '404');
 		}
-
+		if(!session::is_game_master($answer -> team -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games.', 'code' => '403');
+		}
 
 		/* Delete it */
 		try {
@@ -124,7 +135,7 @@ class answer_controller {
 	public static function list_all($page = 1, $itemspp = 20) {
 		/* Check permission */
 		$role = session::getRole();
-		if(!isset(core::$permission[$role]['answer']['read']) || count(core::$permission[$role]['answer']['read']) == 0) {
+		if(true || !isset(core::$permission[$role]['answer']['read']) || count(core::$permission[$role]['answer']['read']) == 0) {
 			return array('error' => 'You do not have permission to do that', 'code' => '403');
 		}
 		if((int)$page < 1 || (int)$itemspp < 1) {

@@ -27,7 +27,10 @@ class person_controller {
 		if(!game_model::get($person -> get_game_id())) {
 			return array('error' => 'person is invalid because related game does not exist', 'code' => '400');
 		}
-
+		if(!session::is_game_master($person -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games.', 'code' => '403');
+		}
+		
 		/* Insert new row */
 		try {
 			/* If a list of names is given, insert everything and just return the last person */
@@ -63,6 +66,10 @@ class person_controller {
 		if(!$person) {
 			return array('error' => 'person not found', 'code' => '404');
 		}
+		if(!session::is_game_member($person -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games.', 'code' => '403');
+		}
+		
 		// $person -> populate_list_person_table();
 		return $person -> to_array_filtered($role);
 	}
@@ -78,6 +85,9 @@ class person_controller {
 		$person = person_model::get($person_id);
 		if(!$person) {
 			return array('error' => 'person not found', 'code' => '404');
+		}
+		if(!session::is_game_master($person -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games.', 'code' => '403');
 		}
 
 		/* Find fields to update */
@@ -116,6 +126,9 @@ class person_controller {
 		if(!$person) {
 			return array('error' => 'person not found', 'code' => '404');
 		}
+		if(!session::is_game_master($person -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games.', 'code' => '403');
+		}
 
 		/* Check for child rows */
 		$person -> populate_list_person_table(0, 1);
@@ -135,7 +148,7 @@ class person_controller {
 	public static function list_all($page = 1, $itemspp = 20) {
 		/* Check permission */
 		$role = session::getRole();
-		if(!isset(core::$permission[$role]['person']['read']) || count(core::$permission[$role]['person']['read']) == 0) {
+		if(true || !isset(core::$permission[$role]['person']['read']) || count(core::$permission[$role]['person']['read']) == 0) {
 			return array('error' => 'You do not have permission to do that', 'code' => '403');
 		}
 		if((int)$page < 1 || (int)$itemspp < 1) {
@@ -165,6 +178,11 @@ class person_controller {
 		if(!isset(core::$permission[$role]['person']['read']) || count(core::$permission[$role]['person']['read']) == 0) {
 			return array('error' => 'You do not have permission to do that', 'code' => '403');
 		}
+		
+		if(!session::is_game_master($game_id)) {
+			return array('error' => 'Your permissions do not extend to other games.', 'code' => '403');
+		}
+		
 		if((int)$page < 1 || (int)$itemspp < 1) {
 			$start = 0;
 			$limit = -1;

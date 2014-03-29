@@ -1,6 +1,7 @@
 <?php
 require_once(dirname(__FILE__)  . "/lib/core.php");
 core::loadClass("team_model");
+core::loadClass("session");
 
 if(!isset($_REQUEST['p']) || trim($_REQUEST['p']) == "") {
 	core::redirect('/trivia/game/');
@@ -13,6 +14,7 @@ if(!$team = team_model::get_by_team_code($team_code)) {
 	exit(0);
 }
 
+session::team_login($team_code);
 core::showHTML(array('layout' => 'htmlLayout', 'template' => 'team/main', 'team' => $team));
 
 function fizzle($message) {
