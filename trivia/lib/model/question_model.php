@@ -40,7 +40,7 @@ class question_model {
 	public $list_answer;
 
 	/* Sort clause to add when listing rows from this table */
-	const SORT_CLAUSE = " ORDER BY `question`.`question_id`";
+	const SORT_CLAUSE = " ORDER BY `question`.`question_sortkey`";
 
 	/**
 	 * Initialise and load related tables

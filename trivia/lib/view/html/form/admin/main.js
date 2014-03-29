@@ -1,6 +1,7 @@
 var game_code = <?php echo json_encode($data['game'] -> get_game_code()); ?>;
 var game_id	= <?php echo json_encode($data['game'] -> get_game_id()); ?>;
 var round_count = 0;
+var question_count = 0;
 
 function tabTo(page) {
 	$('#navbutton li').removeClass('active');
@@ -19,20 +20,24 @@ var AdminMain = Backbone.Router.extend({
 	  },
 
 	  overview: function() {
+		  errClose();
 		  tabTo('overview');
 	  },
 	  
 	  rounds: function() {
+		  errClose();
 		  tabTo('rounds');
 		  loadRounds();
 	  },
 	  
 	  teams: function() {
+		  errClose();
 		  tabTo('teams');
 		  loadTeams();
 	  },
 	  
 	  people: function() {
+		  errClose();
 		  tabTo('people');
 		  loadPeople();
 	  },
@@ -117,6 +122,7 @@ function newRound() {
 }
 
 function showRound(round_id) {
+	errClose();
 	$('#round-list li').removeClass('active');
 	$('#roundpill-' + round_id).addClass('active');
 	
@@ -126,6 +132,7 @@ function showRound(round_id) {
 			var db = new RoundView({
 				model: round
 			});
+			question_count = results.get('question').length;
 			db.render();
 			if($('#round-name').val() == "New Round") {
 				$('#round-name').focus(); // Prompt the user to rename rounds
@@ -300,6 +307,54 @@ function editQuestionSave() {
 	return false;
 }
 
+function questionUp(question_id) {
+	$('#question-up-' + question_id).addClass('disabled');
+	var question = new question_model({question_id: question_id});
+	question.fetch({
+		success: function(results) {
+			question.set({question_sortkey: 'up'});
+			question.save(null, {
+				patch: true,
+				success: function(results) {
+					showRound(results.get('round_id'));
+				},
+				error : function(model, response) {
+					$('#question-up-' + question_id).removeClass('disabled');
+					handleFailedRequest(response);
+				}
+			});
+		},
+		error : function(model, response) {
+			$('#question-up-' + question_id).removeClass('disabled');
+			handleFailedRequest(response);
+		}
+	});
+}
+
+function questionDown(question_id) {
+	$('#question-down-' + question_id).addClass('disabled');
+	var question = new question_model({question_id: question_id});
+	question.fetch({
+		success: function(results) {
+			question.set({question_sortkey: 'down'});
+			question.save(null, {
+				patch: true,
+				success: function(results) {
+					showRound(results.get('round_id'));
+				},
+				error : function(model, response) {
+					$('#question-down-' + question_id).removeClass('disabled');
+					handleFailedRequest(response);
+				}
+			});
+		},
+		error : function(model, response) {
+			$('#question-down-' + question_id).removeClass('disabled');
+			handleFailedRequest(response);
+		}
+	});
+}
+
 /**
  * Code to deal with Teams
  */
@@ -312,6 +367,17 @@ var TeamListView = Backbone.View.extend({
 		this.$el.html(this.template({
 			team_list: this.collection.toJSON()
 		}));
+		return this;
+	}
+});
+
+var TeamInfoView = Backbone.View.extend({
+	model: team_model,
+	el: '#box-teamInfo',
+	template: _.template($('#template-team-info').html()),
+
+	render : function() {
+		this.$el.html(this.template(this.model.toJSON()));
 		return this;
 	}
 });
@@ -385,6 +451,28 @@ function editTeamDelete() {
 			}
 		});
 	}
+}
+
+function teamInfo(team_id) {
+	var team = new team_model({team_id: team_id});
+	team.fetch({
+		success: function(results) {
+			var db = new TeamInfoView({
+				model: team
+			});
+			db.render();
+			$('#teamInfo').modal();
+		},
+		error : function(model, response) {
+			handleFailedRequest(response);
+		}
+	});
+	return false;
+	
+	//
+	//
+	
+	
 }
 
 function editTeamSave() {

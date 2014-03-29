@@ -4,7 +4,7 @@ core::loadClass("database");
 
 /* Set up some basic web things */
 $config['host']						= isset($_SERVER['HTTP_HOST'])? $_SERVER['HTTP_HOST'] : 'localhost';
-$config['webroot']					= isset($_SERVER['HTTP_HOST'])? 'http://'.$_SERVER['HTTP_HOST'].'/' : '';
+$config['webroot']					= isset($_SERVER['HTTP_HOST'])? 'http://'.$_SERVER['HTTP_HOST'].'/trivia/' : '';
 $config['default']['controller']	= 'Page';
 
 /* Map HTTP reuest types to methods */

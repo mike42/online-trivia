@@ -48,7 +48,6 @@ if(isset($_REQUEST['p']) && $_REQUEST['p'] != "") {
 	core::showHTML(array('layout' => 'htmlLayout', 'template' => 'admin/newgame', array()));
 }
 
-
 function fizzle($message) {
 	header("HTTP/1.1 500 Internal Server Error");
 	core::showHTML(array('layout' => 'htmlLayout', 'template' => 'error', 'error' => $message));

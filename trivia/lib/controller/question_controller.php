@@ -85,7 +85,31 @@ class question_controller {
 			$question -> set_question_text($received['question_text']);
 		}
 		if(isset($received['question_sortkey']) && in_array('question_sortkey', core::$permission[$role]['question']['update'])) {
-			$question -> set_question_sortkey($received['question_sortkey']);
+			$temp = "0";
+			$old = $question -> get_question_sortkey();
+			if($received['question_sortkey'] == $old) {
+				$new = $old;
+			} else if($received['question_sortkey'] == "down") {
+				$new = $old + 1;
+			} else if($received['question_sortkey'] == "up") {
+				$new = $old - 1;
+			} else {
+				return array('error' => 'Can only move questions up or down', 'code' => '400');
+			}
+
+			if($new != $old) {
+				/* Perform swap */
+				if(!$replace = question_model::get_by_question_sort($question -> get_round_id(), $new)) {
+					print_r($question);
+					return array('error' => 'Cannot move the question any further', 'code' => '400');
+				}
+				$replace -> set_question_sortkey($temp);
+				$replace -> update();
+				$question -> set_question_sortkey($new);
+				$question -> update();
+				$replace -> set_question_sortkey($old);
+				$replace -> update();
+			}
 		}
 		if(isset($received['question_state']) && in_array('question_state', core::$permission[$role]['question']['update'])) {
 			$question -> set_question_state($received['question_state']);

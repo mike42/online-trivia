@@ -25,10 +25,22 @@
 <script type="text/template" id="template-team-li">
 <% _.each(team_list, function(team)  { %>
 	<li class="list-group-item">
-		<a class="btn btn-default btn-xs" style="float: right" href="#" onClick="return editTeam(<%= _.escape(team.team_id) %>)"><span class="glyphicon glyphicon-edit"></span></a>
-		<%= _.escape(team.team_name) %>
+		<div class="btn-group btn-group-xs" style="float: right">
+			<a class="btn btn-default btn-xs" href="#" onClick="return teamInfo(<%= _.escape(team.team_id) %>)"><span class="glyphicon glyphicon-qrcode"></span></a>
+			<a class="btn btn-default btn-xs" href="#" onClick="return editTeam(<%= _.escape(team.team_id) %>)"><span class="glyphicon glyphicon-edit"></span></a>
+		</div>
+
+		<a href="http://<%= _.escape(location.hostname) %>/trivia/team/<%= _.escape(team.team_code) %>"><%= _.escape(team.team_name) %></a>
 	</li>
 <% }); %>
+</script>
+
+<script type="text/template" id="template-team-info">
+<div style="text-align: center">
+	<h4><%= _.escape(team_name) %></h4>
+	<div><img src="/trivia/api/team/qr/<%= _.escape(team_id) %>" /></div>
+	<div><a href="http://<%= _.escape(location.hostname) %>/trivia/team/<%= _.escape(team_code) %>">http://<%= _.escape(location.hostname) %>/trivia/team/<%= _.escape(team_code) %></a></div>
+</div>
 </script>
 
 <script type="text/template" id="template-round">
@@ -47,7 +59,15 @@
 <ul class="list-group">
 	<% _.each(question, function(question)  { %>
 	<li class="list-group-item">
-		<a class="btn btn-default btn-xs" style="float: right" href="#" onClick="return editQuestion(<%= _.escape(question.question_id) %>)"><span class="glyphicon glyphicon-edit"></span></a>
+		<div class="btn-group btn-group-xs" style="float: right">
+		<% if(question.question_sortkey != 1) { %>
+			<a class="btn btn-default btn-xs" id="question-up-<%= _.escape(question.question_id) %>" onClick="return questionUp(<%= _.escape(question.question_id) %>)"><span class="glyphicon glyphicon-arrow-up"></span></a>
+		<% } %>
+		<% if(question.question_sortkey != question_count) { %>
+			<a class="btn btn-default btn-xs" id="question-down-<%= _.escape(question.question_id) %>" onClick="return questionDown(<%= _.escape(question.question_id) %>)"><span class="glyphicon glyphicon-arrow-down"></span></a>
+		<% } %>
+		<a class="btn btn-default btn-xs" href="#" onClick="return editQuestion(<%= _.escape(question.question_id) %>)"><span class="glyphicon glyphicon-edit"></span></a>
+		</div>
 		<b><%= _.escape(question.question_sortkey) %>.</b> <%= _.escape(question.question_text) %><br/>
 		A. <%= _.escape(question.question_answer) %></li>
 	<% }); %>

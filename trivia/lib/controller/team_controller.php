@@ -190,5 +190,24 @@ class team_controller {
 			return array('error' => 'Failed to list', 'code' => '500');
 		}
 	}
+	
+	public static function qr($team_id) {
+		/* Check permission */
+		$role = session::getRole();
+		if(!isset(core::$permission[$role]['team']['read']) || count(core::$permission[$role]['team']['read']) == 0) {
+			return array('error' => 'You do not have permission to do that', 'code' => '403');
+		}
+		
+		/* Load team */
+		$team = team_model::get($team_id);
+		if(!$team) {
+			return array('error' => 'team not found', 'code' => '404');
+		}
+		
+		$url = core::constructURL('team', 'read', array($team -> get_team_code()), 'html');
+		include(dirname(__FILE__) . '/../vendor/phpqrcode/qrlib.php');
+		QRcode::png($url);
+		return 0; 
+	}
 }
 ?>
