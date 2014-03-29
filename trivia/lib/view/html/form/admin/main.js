@@ -90,7 +90,7 @@ var RoundView = Backbone.View.extend({
 function loadRounds(highlight) {
 	var rounds = new round_collection();
 	rounds.fetch({
-		url: '/trivia/api/round/list_by_game_id/' + game_id,
+		url: '/api/round/list_by_game_id/' + game_id,
 		success : function(results) {
 			var db = new RoundListView({
 				collection : rounds
@@ -416,7 +416,7 @@ function addTeamSave() {
 function loadTeams() {
 	var teams = new team_collection();
 	teams.fetch({
-		url: '/trivia/api/team/list_by_game_id/' + game_id,
+		url: '/api/team/list_by_game_id/' + game_id,
 		success : function(results) {
 			var db = new TeamListView({
 				collection : teams
@@ -550,7 +550,7 @@ function addPeopleSave() {
 function loadPeople() {
 	var people = new person_collection();
 	people.fetch({
-		url: '/trivia/api/person/list_by_game_id/' + game_id,
+		url: '/api/person/list_by_game_id/' + game_id,
 		success : function(results) {
 			var db = new PersonListView({
 				collection : people

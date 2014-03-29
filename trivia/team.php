@@ -4,7 +4,7 @@ core::loadClass("team_model");
 core::loadClass("session");
 
 if(!isset($_REQUEST['p']) || trim($_REQUEST['p']) == "") {
-	core::redirect('/trivia/game/');
+	core::redirect('/game/');
 	exit(0);
 }
 

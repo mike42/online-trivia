@@ -20,7 +20,7 @@ Clone the repo.
 
 Import `trivia.sql` into a new database.
 
-Symlink to `trivia` from your web root.
+Set `trivia` as your web root, symlink your web-root to it, or copy the contents.
 
 Add database connection details to the following code snippet and save to `trivia/site/config.php`
 ```php

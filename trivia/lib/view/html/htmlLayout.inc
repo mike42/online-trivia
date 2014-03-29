@@ -9,8 +9,8 @@
     <link rel="shortcut icon" href="assets/favicon.ico">
 
     <title>Trivia</title>
-    <link href="/trivia/public/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/trivia/public/css/trivia.css" rel="stylesheet">
+    <link href="/public/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/public/css/trivia.css" rel="stylesheet">
 <?php
     if(file_exists(dirname(__FILE__) . "/form/" . $data['template'] . "-header.inc")) {
 		include(dirname(__FILE__) . "/form/" . $data['template'] . "-header.inc");
@@ -24,11 +24,11 @@
 	include(dirname(__FILE__) . "/form/" . $data['template'] . ".inc");
 ?>
     </div>
-    <script src="/trivia/public/js/jquery-1.10.2.min.js"></script>
-   	<script src="/trivia/public/js/underscore-min.js"></script>
-   	<script src="/trivia/public/js/backbone-min.js"></script>
-   	<script src="/trivia/public/js/models.js"></script>
-    <script src="/trivia/public/js/bootstrap.min.js"></script>
+    <script src="/public/js/jquery-1.10.2.min.js"></script>
+   	<script src="/public/js/underscore-min.js"></script>
+   	<script src="/public/js/backbone-min.js"></script>
+   	<script src="/public/js/models.js"></script>
+    <script src="/public/js/bootstrap.min.js"></script>
 	<script>
 <?php
 	include(dirname(__FILE__) . "/form/" . $data['template'] . ".js");

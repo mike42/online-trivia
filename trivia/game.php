@@ -43,7 +43,7 @@ if(isset($_REQUEST['p']) && $_REQUEST['p'] != "") {
 	$game -> set_game_code($game_code);
 	$game -> insert();
 	
-	core::redirect("/trivia/game/$game_code");
+	core::redirect("/game/$game_code");
 	exit(0);
 } else {
 	core::showHTML(array('layout' => 'htmlLayout', 'template' => 'admin/newgame', array()));

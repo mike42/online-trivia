@@ -30,7 +30,7 @@
 			<a class="btn btn-default btn-xs" href="#" onClick="return editTeam(<%= _.escape(team.team_id) %>)"><span class="glyphicon glyphicon-edit"></span></a>
 		</div>
 
-		<a href="http://<%= _.escape(location.hostname) %>/trivia/team/<%= _.escape(team.team_code) %>"><%= _.escape(team.team_name) %></a>
+		<a href="http://<%= _.escape(location.hostname) %>/team/<%= _.escape(team.team_code) %>"><%= _.escape(team.team_name) %></a>
 	</li>
 <% }); %>
 </script>
@@ -38,8 +38,8 @@
 <script type="text/template" id="template-team-info">
 <div style="text-align: center">
 	<h4><%= _.escape(team_name) %></h4>
-	<div><img src="/trivia/api/team/qr/<%= _.escape(team_id) %>" /></div>
-	<div><a href="http://<%= _.escape(location.hostname) %>/trivia/team/<%= _.escape(team_code) %>">http://<%= _.escape(location.hostname) %>/trivia/team/<%= _.escape(team_code) %></a></div>
+	<div><img src="/api/team/qr/<%= _.escape(team_id) %>" /></div>
+	<div><a href="http://<%= _.escape(location.hostname) %>/team/<%= _.escape(team_code) %>">http://<%= _.escape(location.hostname) %>/team/<%= _.escape(team_code) %></a></div>
 </div>
 </script>
 

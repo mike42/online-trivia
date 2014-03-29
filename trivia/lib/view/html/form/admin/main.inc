@@ -1,6 +1,6 @@
 <h1>
 	<a
-		href="/trivia/game/<?php echo core::escapeHTML($data['game'] -> get_game_code()); ?>"><?php echo core::escapeHTML($data['game'] -> get_game_name()); ?>
+		href="/game/<?php echo core::escapeHTML($data['game'] -> get_game_code()); ?>"><?php echo core::escapeHTML($data['game'] -> get_game_name()); ?>
 	</a>
 </h1>
 <div id="errbox" style="display: none" class="alert alert-warning">
