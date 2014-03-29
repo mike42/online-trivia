@@ -10,6 +10,11 @@ h1 a:hover {
 	text-decoration: none;
 }
 
-#round-list {
+.questions-left {
+	min-height: 300px;
 	border-right: 1px solid #ddd;
+}
+
+.lastround {
+	border-top: 1px solid #ddd;
 }

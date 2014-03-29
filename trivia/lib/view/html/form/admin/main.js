@@ -168,6 +168,7 @@ function showRound(round_id) {
 			$('#round-trash').on('click', function() {
 				if(confirm('Delete the round?')) {
 					round.destroy();
+					$('#round-box').empty();
 					loadRounds();
 				}
 			});

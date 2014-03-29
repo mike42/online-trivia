@@ -8,9 +8,9 @@
 </ul>
 
 <div class="page" id="page-overview" style="display: none">
-	<div class="panel panel-info">
+	<div class="panel panel-primary">
 		<div class="panel-heading">
-			<h3 class="panel-title">Game Info</h3>
+			<h3 class="panel-title">Game setup</h3>
 		</div>
 		<div class="panel-body">
 			<form class="navbar-form" action="" method="post" id="rename-form">
@@ -20,14 +20,7 @@
 				</div>
 				<button class="btn btn-default" type="submit" onClick="saveGameName()">Save</button>
 			</form>
-		</div>
-	</div>
-	
-	<div class="panel panel-primary">
-		<div class="panel-heading">
-			<h3 class="panel-title">Start game</h3>
-		</div>
-		<div class="panel-body">
+		
 			<p>Your game needs an MC to call out the questions, and a Zen Master to correct the answers as they come in.</p>
 			<form class="navbar-form navbar-left" role="search">
 				<a class="btn btn-success" href="?zen">Zen Master view</a>
@@ -53,11 +46,11 @@
 <div class="page" id="page-rounds" style="display: none">
 	<div class="panel panel-default">
 		<div class="panel-body">
-			<div class="col-sm-4">
+			<div class="col-sm-4 questions-left">
 				<ul id="round-list" class="nav nav-pills nav-stacked">
 				</ul>
 			</div>
-			<div class="col-sm-8" id="round-box"></div>
+			<div class="col-sm-8 questions-right" id="round-box"></div>
 		</div>
 	</div>
 </div>

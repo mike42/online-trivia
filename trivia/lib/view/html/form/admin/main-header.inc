@@ -1,12 +1,19 @@
 <script type="text/template" id="template-round-li">
 <% _.each(round_list, function(round)  { %>
-	<li id="roundpill-<%= _.escape(round.round_id) %>"><a href="#" onClick="return showRound(<%= _.escape(round.round_id) %>);"><%= _.escape(round.round_sortkey) %>. <%= _.escape(round.name) %></a></li>
+	<li id="roundpill-<%= _.escape(round.round_id) %>">
+		<a href="#" onClick="return showRound(<%= _.escape(round.round_id) %>);">
+			<%= _.escape(round.round_sortkey) %>. <%= _.escape(round.name) %>
+		</a>
+	</li>
 <% }); %>
-	<li><a href="#" onClick="return newRound();"><span class="glyphicon glyphicon-plus"></span> New</a></li>
+	<li class="lastround">
+		<a href="#" onClick="return newRound();">
+			<span class="glyphicon glyphicon-plus"></span> Add Round
+		</a>
+	</li>
 </script>
 
 <script type="text/template" id="template-round">
-
 <h3>Prepare round: <%= _.escape(name) %></h3>
 <div class="input-group" id="round-edit">
 	<input type="text" id="round-name" class="form-control" placeholder="Round name" value="<%= _.escape(name) %>" />
@@ -16,17 +23,15 @@
 		<button id="round-trash" type="button" class="btn btn-default"><span class="glyphicon glyphicon-trash" /></button>
 	</span>
 </div>
-<div id="round-title">
-	<h2></h2>
-</div>
 
-<div class="panel panel-default">
+<div class="panel panel-default" style="margin-top: 25px">
+	<div class="panel-heading">Questions</div>
 <ul class="list-group">
 	<% _.each(question, function(question)  { %>
 	<li class="list-group-item"><b><%= escape(question.sortkey) %>.</b> <%=escape(question_text)%><br/>
 	A. <%= escape(question.answer) %>.</li>
 	<% }); %>
-	<li="list-group-item">..</li>
+	<li class="list-group-item"><a class="btn btn-default"><span class="glyphicon glyphicon-plus"></span> Add A Question</a></li>
 </ul>
 </div>
 </script>

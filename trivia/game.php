@@ -10,6 +10,22 @@ if(isset($_REQUEST['p']) && $_REQUEST['p'] != "") {
 		} else if(isset($_GET['zen'])) {
 			core::showHTML(array('layout' => 'htmlLayout', 'template' => 'zen/main', 'game' => $game));
 		} else {
+			$action = "";
+			if(isset($_POST['action'])) {
+				$action = $_POST['action'];
+			}
+			switch($action) {
+				case 'rename':
+					if(isset($_POST['game_name']) && trim($_POST['game_name']) != "") {
+						$game -> set_game_name(trim($_POST['game_name']));
+						$game -> update();
+					}
+					break;
+				case 'reset':
+					$game -> reset();
+					break;				
+			}
+			
 			core::showHTML(array('layout' => 'htmlLayout', 'template' => 'admin/main', 'game' => $game));
 		}
 	} else {
