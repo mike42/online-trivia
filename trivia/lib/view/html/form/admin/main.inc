@@ -170,6 +170,32 @@
 	</div>
 </div>
 
+<div class="modal fade" id="editTeam" tabindex="-1">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+				<h4 class="modal-title">Edit Team</h4>
+			</div>
+			<div class="modal-body">
+				<form>
+					<input type="hidden" class="form-control" id="editTeamId" />
+					<div class="form-group">
+						<label>Team Name</label>
+						<input type="text" class="form-control" id="editTeamName" placeholder="Team Name" />
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" onClick="editTeamDelete();"><span class="glyphicon glyphicon-trash"></span></button>
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary" onClick="editTeamSave();">Save changes</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
 <div class="modal fade" id="addQuestion" tabindex="-1">
 	<div class="modal-dialog">
 		<div class="modal-content">

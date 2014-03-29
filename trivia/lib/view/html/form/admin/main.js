@@ -289,7 +289,54 @@ function loadTeams() {
 }
 
 function editTeam(team_id) {
-	alert(team_id);
+	var team = new team_model({team_id: team_id});
+	team.fetch({
+		success: function(results) {
+			$('#editTeamId').val(team_id);
+			$('#editTeamName').val(team.get('team_name'));
+			$('#editTeam').modal();
+		},
+		error : function(model, response) {
+			handleFailedRequest(response);
+		}
+	});
+	return false;
+}
+
+function editTeamDelete() {
+	if(confirm('Delete team?')) {
+		var team = new team_model({team_id: $('#editTeamId').val()});
+		team.destroy({
+			success: function(model, response) {
+				$('#editTeam').modal('hide');
+				loadTeams();
+			},							
+			error: function(model, response) {
+				handleFailedRequest(response);
+			}
+		});
+	}
+}
+
+function editTeamSave() {
+	var team = new team_model({team_id: $('#editTeamId').val()});
+	team.fetch({
+		success: function(results) {
+			team.set('team_name', $('#editTeamName').val());
+			team.save(null, {
+				success : function(team) {
+					$('#editTeam').modal('hide');
+					loadTeams();
+				},
+				error : function(model, response) {
+					handleFailedRequest(response);
+				}
+			});
+		},
+		error : function(model, response) {
+			handleFailedRequest(response);
+		}
+	});
 	return false;
 }
 
