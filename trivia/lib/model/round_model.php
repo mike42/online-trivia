@@ -33,6 +33,7 @@ class round_model {
 
 	/* Child tables */
 	public $list_question;
+	public $list_team_round;
 
 	/* Sort clause to add when listing rows from this table */
 	const SORT_CLAUSE = " ORDER BY `round`.`round_sortkey`";
@@ -80,6 +81,7 @@ class round_model {
 		$this -> model_variables_changed = array();
 		$this -> game = new game_model($fields);
 		$this -> list_question = array();
+		$this -> list_team_round = array();
 	}
 
 	/**
@@ -121,6 +123,10 @@ class round_model {
 		$values['question'] = array();
 		foreach($this -> list_question as $question) {
 			$values['question'][] = $question -> to_array_filtered($role);
+		}
+		$values['team_round'] = array();
+		foreach($this -> list_team_round  as $team_round) {
+			$values['team_round'][] = $team_round -> to_array_filtered($role);
 		}
 		return $values;
 	}

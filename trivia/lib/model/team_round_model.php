@@ -321,5 +321,32 @@ class team_round_model {
 		}
 		return $ret;
 	}
+	
+	/**
+	 * List rows by round
+	 *
+	 * @param int $start Row to begin from. Default 0 (begin from start)
+	 * @param int $limit Maximum number of rows to retrieve. Default -1 (no limit)
+	 */
+	public static function list_by_round_id($round_round_id, $start = 0, $limit = -1) {
+		$round = round_model::get($round_round_id);
+		if(!$round) {
+			return array();
+		}
+		$round -> game -> populate_list_team();
+		$ret = array();
+		foreach($round -> game -> list_team as $team) {
+			if(!$team_round = self::get($round -> get_round_id(), $team -> get_team_id())) {
+				$team_round = new team_round_model(array(
+						"team_round.round_round_id" => $round -> get_round_id(),
+						"team_round.team_team_id" => $team -> get_team_id()
+					));
+				$team_round -> set_bonus_points(0);
+				$team_round -> insert();
+			}
+			$ret[] = $team_round;
+		}
+		return $ret;
+	}
 }
 ?>

@@ -94,7 +94,8 @@ class round_controller {
 				}
 			}
 		}
-
+		
+		$round -> list_team_round = team_round_model::list_by_round_id($round_id);
 		return $round -> to_array_filtered($role);
 	}
 	

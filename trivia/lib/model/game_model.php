@@ -432,6 +432,8 @@ class game_model {
 	}
 	
 	public function reset() {
+		$sth = database::$dbh -> prepare("DELETE team_round FROM team_round JOIN team ON team_round.team_team_id = team.team_id WHERE team.game_id = :game_id;");
+		$sth -> execute(array('game_id' => $this -> get_game_id()));
 		$sth = database::$dbh -> prepare("DELETE answer FROM answer JOIN question ON answer.question_id = question.question_id JOIN round ON round.round_id = question.round_id WHERE round.game_id = :game_id;");
 		$sth -> execute(array('game_id' => $this -> get_game_id()));
 		$sth = database::$dbh -> prepare("DELETE person_table FROM person_table JOIN person ON person.person_id = person_table.person_id JOIN game ON person.game_id = game.game_id WHERE game.game_id = :game_id;");

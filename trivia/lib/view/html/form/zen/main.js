@@ -107,10 +107,6 @@ function errClose() {
 	$('#errbox').hide(300);
 }
 
-function leaderboard() {
-	alert('No leaderboard exists yet');
-}
-
 var answer_model = Backbone.Model.extend({
 	defaults: {
 		question_id: 0,
@@ -120,3 +116,41 @@ var answer_model = Backbone.Model.extend({
 		answer_time: ''
 	}
 });
+
+var team_round_model = Backbone.Model.extend({
+	defaults: {
+		round_round_id: 0,
+		team_team_id: 0,
+		bonus_points: 0
+	}
+});
+
+function updateBonus(round_id, team_id) {
+	var id = 'r' + round_id + '-t' + team_id;
+	$('#box-' + id).removeClass('has-success');
+	$('#box-' + id).removeClass('has-error');
+	points = $('#bonus-' + id).val();
+	
+	var team_round = new team_round_model();
+	team_round.fetch({
+		url: '/api/team_round/read/' + round_id + '/' + team_id,
+		success : function(results) {
+			team_round.set({bonus_points: points});
+			team_round.save(null, {
+				url: '/api/team_round/update/' + round_id + '/' + team_id,
+				patch: true,
+				success : function(results) {
+					$('#box-' + id).addClass('has-success');
+				},
+				error : function(model, response) {
+					$('#box-' + id).addClass('has-error');
+					handleFailedRequest(response);
+				}
+			});
+		},
+		error : function(model, response) {
+			$('#box-' + id).addClass('has-error');
+			handleFailedRequest(response);
+		}
+	});
+}

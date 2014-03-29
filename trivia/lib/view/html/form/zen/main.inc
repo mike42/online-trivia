@@ -1,7 +1,7 @@
 <div class="main-info panel panel-success">
 	<div class="panel-heading">
 		<h3 class="panel-title">
-			<?php echo core::escapeHTML($data['game'] -> get_game_name()) ?> (Zen Master mode)
+			<?php echo core::escapeHTML($data['game'] -> get_game_name()) ?> (Zen Master view)
 		</h3>
 	</div>
 	<div class="panel-body">

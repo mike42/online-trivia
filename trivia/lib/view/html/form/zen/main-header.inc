@@ -25,7 +25,13 @@
 
 <div class="panel panel-default" style="margin-top: 25px">
 <div class="panel-heading">Bonus points</div>
-<ul class="list-group">
+<ul class="list-group" id="bonus-points">
+<% _.each(team_round, function(team_round)  { %>
+<li class="list-group-item form-group" id="box-r<%= _.escape(team_round.round.round_id) %>-t<%= _.escape(team_round.team.team_id) %>">
+<label><%= _.escape(team_round.team.team_name) %></label> <input onChange="updateBonus('<%= _.escape(team_round.round.round_id) %>', '<%= _.escape(team_round.team.team_id) %>')" id="bonus-r<%= _.escape(team_round.round.round_id) %>-t<%= _.escape(team_round.team.team_id) %>" type="text" class="form-control" value="<%= _.escape(team_round.bonus_points) %>"/>
+</li>
+<% }); %>
+<ul>
 </div>
 </script>
 
@@ -38,8 +44,8 @@
 	</li>
 <% }); %>
 	<li class="lastround">
-		<a href="#" onClick="return leaderboard();">
-			<span class="glyphicon glyphicon-list-alt"></span> Leaderboard
+		<a href="?">
+			<span class="glyphicon glyphicon-arrow-left"></span> Back to game setup
 		</a>
 	</li>
 </script>
