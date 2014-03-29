@@ -37,7 +37,6 @@ $permission['team'] = array(
 				'read' => array(
 						'question_id',
 						'round_id',
-						'question_text',
 						'question_sortkey',
 						'question_state'),
 				'update' => array(),
