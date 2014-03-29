@@ -71,6 +71,32 @@ $(function() {
 	loadRounds();
 });
 
+function score(question_id, team_id, score) {
+	$('#answer-q' + question_id + '-t' + team_id + ' button').addClass('disabled');
+	var answer = new answer_model();
+	answer.fetch({
+		url: '/api/answer/read/' + question_id + '/' + team_id,
+		success : function(results) {
+			answer.set({answer_is_correct: score});
+			answer.save(null, {
+				url: '/api/answer/update/' + question_id + '/' + team_id,
+				patch: true,
+				success : function(results) {
+					$('#answer-q' + question_id + '-t' + team_id).hide();
+				},
+				error : function(model, response) {
+					$('#answer-q' + question_id + '-t' + team_id + ' button').removeClass('disabled');
+					handleFailedRequest(response);
+				}
+			});
+		},
+		error : function(model, response) {
+			$('#answer-q' + question_id + '-t' + team_id + ' button').removeClass('disabled');
+			handleFailedRequest(response);
+		}
+	});
+}
+
 function handleFailedRequest(response) {
 	var responseObj = $.parseJSON(response.responseText);
 	$('#errmsg').text(responseObj.error);
@@ -84,3 +110,13 @@ function errClose() {
 function leaderboard() {
 	alert('No leaderboard exists yet');
 }
+
+var answer_model = Backbone.Model.extend({
+	defaults: {
+		question_id: 0,
+		team_id: 0,
+		answer_text: '',
+		answer_is_correct: 0,
+		answer_time: ''
+	}
+});

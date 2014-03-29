@@ -83,12 +83,18 @@ class round_controller {
 		if(!session::is_game_master($round -> get_game_id())) {
 			return array('error' => 'You do not have permission to do that', 'code' => '403');
 		}
+		
+		/* Load everything and discard answers which are already marked */
 		$round -> populate_list_question();
 		foreach($round -> list_question as $key => $lq) {
 			$round -> list_question[$key] -> populate_list_answer();
+			foreach($round -> list_question[$key] -> list_answer as $k2 => $answer) {
+				if($answer -> get_answer_is_correct() != "0") {
+					unset($round -> list_question[$key] -> list_answer[$k2]);
+				}
+			}
 		}
-		
-		
+
 		return $round -> to_array_filtered($role);
 	}
 	

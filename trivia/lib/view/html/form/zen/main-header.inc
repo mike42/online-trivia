@@ -11,9 +11,9 @@
 		<% _.each(question.answer, function(a)  { %>
 			<li id="answer-q<%= _.escape(a.question_id) %>-t<%= _.escape(a.team_id) %>">
 			<div style="float:right" class="btn-group btn-group-xs">
-				<button class="btn btn-xs btn-danger">0</button>
-				<button class="btn btn-xs btn-success">1</button>
-				<button class="btn btn-xs btn-primary">2</button>
+				<button class="btn btn-xs btn-danger" onClick="score('<%= _.escape(a.question_id) %>', '<%= _.escape(a.team_id) %>', 1)">0</button>
+				<button class="btn btn-xs btn-success" onClick="score('<%= _.escape(a.question_id) %>', '<%= _.escape(a.team_id) %>', 2)">1</button>
+				<button class="btn btn-xs btn-primary" onClick="score('<%= _.escape(a.question_id) %>', '<%= _.escape(a.team_id) %>', 3)">2</button>
 			</div>
 			<b><%= _.escape(a.team.team_name) %>:</b> <%= _.escape(a.answer_text) %></li>
 		<% }); %>
