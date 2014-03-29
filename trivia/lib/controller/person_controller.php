@@ -21,7 +21,7 @@ class person_controller {
 				$init["person.$field"] = $received[$field];
 			}
 		}
-			$person = new person_model($init);
+		$person = new person_model($init);
 
 		/* Check parent tables */
 		if(!game_model::get($person -> get_game_id())) {
@@ -30,8 +30,22 @@ class person_controller {
 
 		/* Insert new row */
 		try {
-			$person -> insert();
-			return $person -> to_array_filtered($role);
+			/* If a list of names is given, insert everything and just return the last person */
+			$p2 = $person;
+			$names = explode("\n", $person -> get_person_name());
+			foreach($names as $name) {
+				if(trim($name) != "") {
+					$p2 = new person_model();
+					try {
+						$p2 -> set_game_id($person -> get_game_id());
+						$p2 -> set_person_name(trim($name));
+						$p2 -> insert();
+					} catch(Exception $e) {
+						// Ignore anything invalid
+					}
+				}
+			}
+			return $p2 -> to_array_filtered($role);
 		} catch(Exception $e) {
 			return array('error' => 'Failed to add to database', 'code' => '500');
 		}
@@ -135,6 +149,33 @@ class person_controller {
 		/* Retrieve and filter rows */
 		try {
 			$person_list = person_model::list_all($start, $limit);
+			$ret = array();
+			foreach($person_list as $person) {
+				$ret[] = $person -> to_array_filtered($role);
+			}
+			return $ret;
+		} catch(Exception $e) {
+			return array('error' => 'Failed to list', 'code' => '500');
+		}
+	}
+	
+	public static function list_by_game_id($game_id, $page = 0, $itemspp = 0) {
+		/* Check permission */
+		$role = session::getRole();
+		if(!isset(core::$permission[$role]['person']['read']) || count(core::$permission[$role]['person']['read']) == 0) {
+			return array('error' => 'You do not have permission to do that', 'code' => '403');
+		}
+		if((int)$page < 1 || (int)$itemspp < 1) {
+			$start = 0;
+			$limit = -1;
+		} else {
+			$start = ($page - 1) * $itemspp;
+			$limit = $itemspp;
+		}
+		
+		/* Retrieve and filter rows */
+		try {
+			$person_list = person_model::list_by_game_id($game_id, $start, $limit);
 			$ret = array();
 			foreach($person_list as $person) {
 				$ret[] = $person -> to_array_filtered($role);

@@ -25,7 +25,7 @@ class person_model {
 	public $list_person_table;
 
 	/* Sort clause to add when listing rows from this table */
-	const SORT_CLAUSE = " ORDER BY `person`.`person_id`";
+	const SORT_CLAUSE = " ORDER BY `person`.`person_name`";
 
 	/**
 	 * Initialise and load related tables

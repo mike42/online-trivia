@@ -28,10 +28,12 @@ var AdminMain = Backbone.Router.extend({
 	  
 	  teams: function() {
 		  tabTo('teams');
+		  loadTeams();
 	  },
 	  
 	  people: function() {
 		  tabTo('people');
+		  loadPeople();
 	  },
 	  
 	  defaultRoute: function(path) {
@@ -182,5 +184,116 @@ function showRound(round_id) {
 	return false;
 }
 
+/**
+ * Code to deal with Teams
+ */
+var TeamListView = Backbone.View.extend({
+	collection : null,
+	el : '#team-list',
+	template : _.template($('#template-team-li').html()),
 
+	render : function() {
+		this.$el.html(this.template({
+			team_list: this.collection.toJSON()
+		}));
+		return this;
+	}
+});
 
+$('#addTeam').on('show.bs.modal', function() {
+    $("#addTeamName").val('');
+})
+$('#addTeam').on('shown.bs.modal', function() {
+    $("#addTeamName").focus();
+})
+
+function addTeam() {
+	$('#addTeam').modal('show');
+}
+
+function addTeamSave() {
+	var team = new team_model({team_name: $("#addTeamName").val(), game_id: game_id});
+	team.save(null, {
+		success : function(team) {
+			loadTeams();
+		},
+		error : function(model, response) {
+			handleFailedRequest(response);
+		}
+	});
+	
+	$('#addTeam').modal('hide');
+}
+
+function loadTeams() {
+	var teams = new team_collection();
+	teams.fetch({
+		url: '/trivia/api/team/list_by_game_id/' + game_id,
+		success : function(results) {
+			var db = new TeamListView({
+				collection : teams
+			});
+			db.render();
+		},
+		error : function(model, response) {
+			handleFailedRequest(response);
+		}
+	});
+}
+
+/**
+ * Code to deal with People
+ */
+var PersonListView = Backbone.View.extend({
+	collection : null,
+	el : '#person-list',
+	template : _.template($('#template-person-li').html()),
+
+	render : function() {
+		this.$el.html(this.template({
+			person_list: this.collection.toJSON()
+		}));
+		return this;
+	}
+});
+
+$('#addPerson').on('show.bs.modal', function() {
+    $("#addPersonName").val('');
+})
+$('#addPerson').on('shown.bs.modal', function() {
+    $("#addPersonName").focus();
+})
+
+function addPerson() {
+	$('#addPerson').modal();
+}
+
+function addPeopleSave() {
+	var person = new person_model({person_name: $("#addPersonName").val(), game_id: game_id});
+	person.save(null, {
+		success : function(person) {
+			loadPeople();
+		},
+		error : function(model, response) {
+			handleFailedRequest(response);
+		}
+	});
+	
+	$('#addPerson').modal('hide');
+}
+
+function loadPeople() {
+	var people = new person_collection();
+	people.fetch({
+		url: '/trivia/api/person/list_by_game_id/' + game_id,
+		success : function(results) {
+			var db = new PersonListView({
+				collection : people
+			});
+			db.render();
+		},
+		error : function(model, response) {
+			handleFailedRequest(response);
+		}
+	});
+}

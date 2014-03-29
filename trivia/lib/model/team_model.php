@@ -32,7 +32,7 @@ class team_model {
 	public $list_team_round;
 
 	/* Sort clause to add when listing rows from this table */
-	const SORT_CLAUSE = " ORDER BY `team`.`team_id`";
+	const SORT_CLAUSE = " ORDER BY `team`.`team_name`";
 
 	/**
 	 * Initialise and load related tables

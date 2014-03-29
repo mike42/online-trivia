@@ -21,13 +21,19 @@ class team_controller {
 				$init["team.$field"] = $received[$field];
 			}
 		}
-			$team = new team_model($init);
+		$team = new team_model($init);
 
 		/* Check parent tables */
 		if(!game_model::get($team -> get_game_id())) {
 			return array('error' => 'team is invalid because related game does not exist', 'code' => '400');
 		}
-
+		
+		/* Choose new team code */
+		do {
+			$team_code = core::makeCode(6);
+		} while($test = team_model::get_by_team_code($team_code));
+		$team -> set_team_code($team_code);
+			
 		/* Insert new row */
 		try {
 			$team -> insert();
@@ -148,6 +154,33 @@ class team_controller {
 		/* Retrieve and filter rows */
 		try {
 			$team_list = team_model::list_all($start, $limit);
+			$ret = array();
+			foreach($team_list as $team) {
+				$ret[] = $team -> to_array_filtered($role);
+			}
+			return $ret;
+		} catch(Exception $e) {
+			return array('error' => 'Failed to list', 'code' => '500');
+		}
+	}
+	
+	public static function list_by_game_id($game_id, $page = 0, $itemspp = 0) {
+		/* Check permission */
+		$role = session::getRole();
+		if(!isset(core::$permission[$role]['team']['read']) || count(core::$permission[$role]['team']['read']) == 0) {
+			return array('error' => 'You do not have permission to do that', 'code' => '403');
+		}
+		if((int)$page < 1 || (int)$itemspp < 1) {
+			$start = 0;
+			$limit = -1;
+		} else {
+			$start = ($page - 1) * $itemspp;
+			$limit = $itemspp;
+		}
+		
+		/* Retrieve and filter rows */
+		try {
+			$team_list = team_model::list_by_game_id($game_id, $start, $limit);
 			$ret = array();
 			foreach($team_list as $team) {
 				$ret[] = $team -> to_array_filtered($role);

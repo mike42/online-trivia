@@ -13,6 +13,18 @@
 	</li>
 </script>
 
+<script type="text/template" id="template-person-li">
+<% _.each(person_list, function(person)  { %>
+	<li class="list-group-item"><%= _.escape(person.person_name) %></li>
+<% }); %>
+</script>
+
+<script type="text/template" id="template-team-li">
+<% _.each(team_list, function(team)  { %>
+	<li class="list-group-item"><%= _.escape(team.team_name) %></li>
+<% }); %>
+</script>
+
 <script type="text/template" id="template-round">
 <h3>Prepare round: <%= _.escape(name) %></h3>
 <div class="input-group" id="round-edit">
