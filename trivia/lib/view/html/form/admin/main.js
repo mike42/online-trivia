@@ -1,5 +1,6 @@
 var game_code = <?php echo json_encode($data['game'] -> get_game_code()); ?>;
 var game_id	= <?php echo json_encode($data['game'] -> get_game_id()); ?>;
+var round_count = 0;
 
 function tabTo(page) {
 	$('#navbutton li').removeClass('active');
@@ -89,6 +90,7 @@ function loadRounds(highlight) {
 			var db = new RoundListView({
 				collection : rounds
 			});
+			round_count = rounds.length;
 			db.render();
 			if(typeof highlight !== 'undefined') {
 				showRound(highlight);
@@ -129,6 +131,18 @@ function showRound(round_id) {
 				$('#round-name').focus(); // Prompt the user to rename rounds
 			}
 			
+			/* Up and down buttons */
+			if(round.get('round_sortkey') == '1') {
+				$('#round-up').addClass('disabled');
+			} else {
+				$('#round-up').removeClass('disabled');
+			}
+			if(round.get('round_sortkey') == round_count) {
+				$('#round-down').addClass('disabled');
+			} else {
+				$('#round-down').removeClass('disabled');
+			}
+			
 			$('#round-name').on('change', function() {
 				round.set({name: $('#round-name').val()});
 				round.save(null, {
@@ -142,6 +156,7 @@ function showRound(round_id) {
 			});
 			
 			$('#round-up').on('click', function() {
+				$('#round-up').addClass('disabled');
 				round.set({round_sortkey: 'up'});
 				round.save(null, {
 					patch: true,
@@ -155,6 +170,7 @@ function showRound(round_id) {
 			});
 			
 			$('#round-down').on('click', function() {
+				$('#round-down').addClass('disabled');
 				round.set({round_sortkey: 'down'});
 				round.save(null, {
 					patch: true,
