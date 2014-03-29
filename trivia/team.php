@@ -21,11 +21,10 @@ if(isset($_POST['action'])) {
 			$data = add_people($team);
 			break;
 		case 'answer':
-			// TODO
-			
-			$data = array('ok' => 'yes');
+			$data = add_answer($team);
+			break;
 		default:
-			fizzle('Unknown action.', '500');
+			$data = array('ok' => 'no', 'error' => 'Unknown action');
 	}
 	echo json_encode($data);
 } else {
@@ -41,7 +40,7 @@ if(isset($_POST['action'])) {
 			unset($team -> game -> list_round[$round_id]);
 		}
 	}
-	
+
 	$team -> game -> populate_list_person();
 
 	core::showHTML(array('layout' => 'htmlLayout', 'template' => 'team/main', 'team' => $team -> to_array_filtered('team')));
@@ -55,13 +54,13 @@ function fizzle($message) {
 
 function add_people(team_model $team) {
 	if(!isset($_REQUEST['round_sortkey'])) {
-		fizzle('No sortkey specified');
+		return array('ok' => 'no', 'error' => 'No sortkey specified');
 	}
 	$round_sortkey = $_REQUEST['round_sortkey'];
 
 	$round = round_model::get_by_round_sort($team -> get_game_id(), $round_sortkey);
 	if($round === false) {
-		return array('error' => "Round does not exist");
+		return array('ok' => 'no', 'error' => 'Round does not exist');
 	}
 	$set = false;
 	foreach($_POST as $key => $val) {
@@ -85,11 +84,39 @@ function add_people(team_model $team) {
 			}
 		}
 	}
-	
-	
+
+
 	if(!$set) {
-		
+		return array('ok' => 'no', 'error' => 'Must select somebody');
 	}
+
+	return array('ok' => 'yes');
+}
+
+function add_answer($team) {
+	if(!isset($_POST['answer_text']) || !isset($_POST['question_id'])) {
+		return array('ok' => 'no', 'error' => 'Not enoguh information');
+	}
+	$question_id = (int)$_POST['question_id'];
+	$answer_text = trim($_POST['answer_text']);
+	
+	if(!$question = question_model::get($question_id)) {
+		return array('ok' => 'no', 'error' => 'Question not found');
+	}
+	if($answer = answer_model::get($question_id, $team -> get_team_id())) {
+		/* Will not write over old answer, but must return without error so the client can move on */
+		return array('ok' => 'yes');
+	}
+	if($question -> round -> get_game_id() != $team -> get_game_id()) {
+		return array('ok' => 'no', 'error' => 'Question is not from this game');
+	}
+
+	$answer = new answer_model(array(
+			'answer.question_id' => $question -> get_question_id(),
+			'answer.team_id' => $team -> get_team_id(),
+	));
+	$answer -> set_answer_time(date("Y-m-d H:i:s"));
+	$answer -> set_answer_text($answer_text);
+	$answer -> insert();
 	$data = array('ok' => 'yes');
-	return $data;
 }

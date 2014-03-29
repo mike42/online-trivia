@@ -15,6 +15,8 @@ function selectTeam() {
 	showBox('team-select');
 	$('#people input').removeAttr('checked');
 	$('#people-select-round-sortkey').val(round.round_sortkey);
+	$('#peopleSearch').val('');
+	peopleSearchFilter();
 	$('#peopleSearch').focus();
 }
 
@@ -32,9 +34,12 @@ function next_question() {
 	if(round.question.length > 0) {
 		showBox('question');
 		question = round.question.shift();
-		console.log(question);
+		$('#question-title').text(question.round.name + ', Q' + question.question_sortkey);
+		$('#question-id').val(question.question_id);
+		$('#ans-box').val('');
+		$('#ans-box').focus();
 	} else {
-		if(eam.game.round.length > 0) {
+		if(team.game.round.length > 0) {
 			endRound();
 		} else {
 			endGame();
@@ -56,39 +61,54 @@ $(function() {
 
 	$('#ans-form').on('submit', function(e) { //use on if jQuery 1.7+
 	    e.preventDefault();  //prevent form from submitting
-	    submitAnswer($("#people-select").serialize());
+	    submitAnswer($("#ans-form").serialize());
+	    return false;
+	});
+
+	$('#peopleSearch').on('input', function() {
+		peopleSearchFilter();
+	});
+	
+	$('#savePeople').on('click', function() {
+		var datastring = $("#people-select").serialize();
+		$.ajax({
+	        type: "POST",
+	        url: "/team/" + team.team_code,
+	        data: datastring,
+	        dataType: "json",
+	        success: function(data) {
+	        	next_question()
+	        },
+	        error: function(){
+	            showError("Couldn't save team list. Try again!");
+	        }
+	    });
 	    return false;
 	});
 })
 
-$('#peopleSearch').on('input', function() {
+function peopleSearchFilter() {
 	var value = $('#peopleSearch').val().toLowerCase();
 	$("#people li").show();
 	$("#people > li").filter(
 		function() {
 			return $(this).text().toLowerCase().indexOf(value) == -1;
 		}).hide();
-});
+}
 
-$('#savePeople').on('click', function() {
-	var datastring = $("#people-select").serialize();
+function submitAnswer(data) {
 	$.ajax({
         type: "POST",
         url: "/team/" + team.team_code,
-        data: datastring,
+        data: data,
         dataType: "json",
         success: function(data) {
-        	next_question()
+        	next_question();
         },
         error: function(){
-            showError("Couldn't save team list. Try again!");
+            showError("Couldn't save your answer. Please try again!");
         }
     });
-    return false;
-});
-
-function submitAnswer() {
-	// TODO
 }
 
 function showError(text) {

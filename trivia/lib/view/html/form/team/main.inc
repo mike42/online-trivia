@@ -43,19 +43,22 @@
 			</div>
 		</div>
 		<div id="box-finish" class="panel-body" style="display: none">
-			<p>You've reached the end! See you next time.</p>
+			<p>You've reached the end of the game! See you next time.</p>
+			<p><a href="/">Return to home page</a></p>
 		</div>
 		<div id="box-question" class="panel-body" style="display: none; text-align: center;">
-			<h2>..</h2>
+			<h2 id="question-title">..</h2>
 			<form id="ans-form">
+				<input type="hidden" name="action" value="answer" />
+				<input type="hidden" name="question_id" value="" id="question-id"/>
 				<p><input class="form-control" type="text" name="answer_text" placeholder="Answer" id="ans-box" autocomplete="off" /></p>
 				<p><button type="submit" class="btn btn-primary">Answer</button></p>
 			</form>
 		</div>
 		<div id="box-endround" class="panel-body" style="display: none">
-			<p>Round is over.</p>
+			<p>You've reached the end of the round!.</p>
 			<a class="btn btn-primary btn-lg" href="#"
-				onClick="return next_round()">Next</a>
+				onClick="return next_round()">Begin next round</a>
 		</div>
 	</div>
 </div>
