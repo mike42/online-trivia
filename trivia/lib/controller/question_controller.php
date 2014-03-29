@@ -168,7 +168,7 @@ class question_controller {
 	
 	private static function correct_sortkeys(round_model $round) {
 		$round -> populate_list_question();
-		foreach($game -> list_question as $id => $question) {
+		foreach($round -> list_question as $id => $question) {
 			if($id + 1 < $question -> get_question_sortkey()) {
 				$question -> set_question_sortkey($id + 1);
 				$question -> update();

@@ -227,7 +227,60 @@ function addQuestionSave() {
 }
 
 function editQuestion(question_id) {
-	alert(question_id);
+	var question = new question_model({question_id: question_id});
+	question.fetch({
+		success: function(results) {
+			$('#editQuestionId').val(question_id);
+			$('#editQuestionRoundId').val(question.get('round_id'));
+			$('#editQuestionText').val(question.get('question_text'));
+			$('#editQuestionAnswer').val(question.get('question_answer'));
+			$('#editQuestion').modal();
+		},
+		error : function(model, response) {
+			handleFailedRequest(response);
+		}
+	});
+	return false;
+}
+
+function editQuestionDelete() {
+	if(confirm('Delete question?')) {
+		var question = new question_model({question_id: $('#editQuestionId').val()});
+		question.destroy({
+			success: function(model, response) {
+				$('#editQuestion').modal('hide');
+				showRound($('#editQuestionRoundId').val());
+			},							
+			error: function(model, response) {
+				handleFailedRequest(response);
+			}
+		});
+	}
+}
+
+function editQuestionSave() {
+	var question = new question_model({question_id: $('#editQuestionId').val()});
+	question.fetch({
+		success: function(results) {
+			question.set({
+				question_text:  $("#editQuestionText").val(),
+				question_answer: $("#editQuestionAnswer").val()
+			});
+			question.save(null, {
+				patch: true,
+				success : function(team) {
+					$('#editQuestion').modal('hide');
+					showRound($('#editQuestionRoundId').val());
+				},
+				error : function(model, response) {
+					handleFailedRequest(response);
+				}
+			});
+		},
+		error : function(model, response) {
+			handleFailedRequest(response);
+		}
+	});
 	return false;
 }
 
