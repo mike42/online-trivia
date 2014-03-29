@@ -3,7 +3,6 @@ var round = null;
 var question = null;
 
 function endGame() {
-	// TODO
 	showBox('finish');
 }
 

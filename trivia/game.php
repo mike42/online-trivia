@@ -8,6 +8,12 @@ if(isset($_REQUEST['p']) && $_REQUEST['p'] != "") {
 	if($game = game_model::get_by_game_code($game_code)) {
 		session::game_login($game_code);
 		if(isset($_GET['projector'])) {
+			$game -> populate_list_person();
+			$game -> populate_list_round();
+			foreach($game -> list_round as $k => $round) {
+				$game -> list_round[$k] -> populate_list_question();
+			}
+			$game -> populate_list_team();
 			core::showHTML(array('layout' => 'htmlLayout', 'template' => 'projector/main', 'game' => $game));
 		} else if(isset($_GET['zen'])) {
 			core::showHTML(array('layout' => 'htmlLayout', 'template' => 'zen/main', 'game' => $game));

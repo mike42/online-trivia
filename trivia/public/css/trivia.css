@@ -33,3 +33,8 @@ h1 a:hover {
 	padding-right: 7px;
 	font-weight: bold;
 }
+
+.main-info {
+  padding: 40px 15px;
+  text-align: center;
+}

@@ -68,6 +68,38 @@ class question_controller {
 		return $question -> to_array_filtered($role);
 	}
 
+	public static function status($question_id = null) {
+		/* Check permission */
+		$role = session::getRole();
+		if(!isset(core::$permission[$role]['question']['read']) || count(core::$permission[$role]['question']['read']) == 0) {
+			return array('error' => 'You do not have permission to do that', 'code' => '403');
+		}
+	
+		/* Load question */
+		$question = question_model::get($question_id);
+		if(!$question) {
+			return array('error' => 'question not found', 'code' => '404');
+		}
+		if(!session::is_game_master($question -> round -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games', 'code' => '403');
+		}
+		
+		/* Figure out who has answered */
+		$question -> round -> game -> populate_list_team();
+		$answered = array();
+		foreach($question -> round -> game -> list_team as $team) {
+			$answered[$team -> team_id] = 0;
+		}
+		
+		$question -> populate_list_answer();
+		foreach($question -> list_answer as $answer) {
+			$answered[$answer -> team_id] = 1;
+		}
+		$ret = $question -> to_array_filtered($role);
+		$ret['status'] = $answered;
+		return $ret;
+	}
+	
 	public static function update($question_id = null) {
 		/* Check permission */
 		$role = session::getRole();
