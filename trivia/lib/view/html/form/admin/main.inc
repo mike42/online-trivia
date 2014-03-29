@@ -56,6 +56,9 @@
 
 <div class="page" id="page-rounds" style="display: none">
 	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title">Manage rounds</h3>
+		</div>
 		<div class="panel-body">
 			<div class="col-sm-4 questions-left">
 				<ul id="round-list" class="nav nav-pills nav-stacked">

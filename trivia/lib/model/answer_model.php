@@ -33,7 +33,7 @@ class answer_model {
 	public $team;
 
 	/* Sort clause to add when listing rows from this table */
-	const SORT_CLAUSE = " ORDER BY `answer`.`question_id`, `answer`.`team_id`";
+	const SORT_CLAUSE = " ORDER BY `answer`.`answer_time` DESC, `answer`.`team_id`";
 
 	/**
 	 * Initialise and load related tables

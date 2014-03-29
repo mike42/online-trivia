@@ -68,6 +68,30 @@ class round_controller {
 		return $round -> to_array_filtered($role);
 	}
 
+	public static function detailed($round_id = null) {
+		/* Check permission */
+		$role = session::getRole();
+		if(!isset(core::$permission[$role]['round']['read']) || count(core::$permission[$role]['round']['read']) == 0) {
+			return array('error' => 'You do not have permission to do that', 'code' => '403');
+		}
+	
+		/* Load round */
+		$round = round_model::get($round_id);
+		if(!$round) {
+			return array('error' => 'round not found', 'code' => '404');
+		}
+		if(!session::is_game_master($round -> get_game_id())) {
+			return array('error' => 'You do not have permission to do that', 'code' => '403');
+		}
+		$round -> populate_list_question();
+		foreach($round -> list_question as $key => $lq) {
+			$round -> list_question[$key] -> populate_list_answer();
+		}
+		
+		
+		return $round -> to_array_filtered($role);
+	}
+	
 	public static function update($round_id = null) {
 		/* Check permission */
 		$role = session::getRole();

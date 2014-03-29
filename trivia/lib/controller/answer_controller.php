@@ -158,5 +158,39 @@ class answer_controller {
 			return array('error' => 'Failed to list', 'code' => '500');
 		}
 	}
+	
+	public static function list_by_question_id($question_id, $page = 0, $itemspp = 0) {
+		/* Check permission */
+		$role = session::getRole();
+		if(true || !isset(core::$permission[$role]['answer']['read']) || count(core::$permission[$role]['answer']['read']) == 0) {
+			return array('error' => 'You do not have permission to do that', 'code' => '403');
+		}
+		if(!$question = question_model::get($question_id)) {
+			return array('error' => 'Question not found.', 'code' => '404');
+		}
+		if(!session::is_game_master($question -> round -> get_round_id())) {
+			return array('error' => 'Your permissions do not extend to other games.', 'code' => '403');
+		}
+
+		if((int)$page < 1 || (int)$itemspp < 1) {
+			$start = 0;
+			$limit = -1;
+		} else {
+			$start = ($page - 1) * $itemspp;
+			$limit = $itemspp;
+		}
+	
+		/* Retrieve and filter rows */
+		try {
+			$answer_list = answer_model::list_all($start, $limit);
+			$ret = array();
+			foreach($answer_list as $answer) {
+				$ret[] = $answer -> to_array_filtered($role);
+			}
+			return $ret;
+		} catch(Exception $e) {
+			return array('error' => 'Failed to list', 'code' => '500');
+		}
+	}
 }
 ?>

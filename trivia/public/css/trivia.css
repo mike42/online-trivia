@@ -18,3 +18,18 @@ h1 a:hover {
 .lastround {
 	border-top: 1px solid #ddd;
 }
+
+.answer-list li {
+	border-top: 1px solid #eee;
+}
+
+.answer-list {
+	list-style-type: none;
+	padding: 0;
+}
+
+.answer-list .btn-group .btn {
+	padding-left: 7px;
+	padding-right: 7px;
+	font-weight: bold;
+}
