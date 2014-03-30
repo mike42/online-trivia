@@ -343,6 +343,7 @@ class team_round_model {
 					));
 				$team_round -> set_bonus_points(0);
 				$team_round -> insert();
+				$team_round = self::get($round -> get_round_id(), $team -> get_team_id());
 			}
 			$ret[] = $team_round;
 		}
