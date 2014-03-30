@@ -23,7 +23,7 @@
 				onClick="return next_round()">We're ready</a>
 		</div>
 		<div id="box-team-select" class="panel-body" style="display: none">
-			<div class="form-group">
+			<div class="form-group col-sm-6 col-sm-offset-3" style="text-align: left">
 				<label>Who is on your team?</label> <input type="text"
 					class="form-control" placeholder="Quick search" id="peopleSearch" />
 
@@ -38,8 +38,9 @@
 						?>
 					</ul>
 				</form>
-
-				<button id="savePeople" class="btn btn-default">Continue &rarr;</button>
+				<div style="text-align: center">
+					<button id="savePeople" class="btn btn-default">Continue &rarr;</button>
+				</div>
 			</div>
 		</div>
 		<div id="box-finish" class="panel-body" style="display: none">
