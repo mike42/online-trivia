@@ -60,11 +60,13 @@
 			<h3 class="panel-title">Manage rounds</h3>
 		</div>
 		<div class="panel-body">
-			<div class="col-sm-4 questions-left">
-				<ul id="round-list" class="nav nav-pills nav-stacked">
-				</ul>
+			<div class="row question-row">
+				<div class="col-sm-4 questions-left">
+					<ul id="round-list" class="nav nav-pills nav-stacked">
+					</ul>
+				</div>
+				<div class="col-sm-8 questions-right" id="round-box"></div>
 			</div>
-			<div class="col-sm-8 questions-right" id="round-box"></div>
 		</div>
 	</div>
 </div>
@@ -109,12 +111,10 @@
 				<h4 class="modal-title">Add People</h4>
 			</div>
 			<div class="modal-body">
-				<form>
 					<div class="form-group">
 						<label>Names, one per line</label>
 						<textarea class="form-control" id="addPersonName" placeholder="Name"></textarea>
 					</div>
-				</form>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -133,13 +133,11 @@
 				<h4 class="modal-title">Edit Person</h4>
 			</div>
 			<div class="modal-body">
-				<form>
-					<input type="hidden" id="editPersonId" value=""/>
-					<div class="form-group">
-						<label>Name</label>
-						<input class="form-control" type="text" id="editPersonName" placeholder="Name" />
-					</div>
-				</form>
+				<input type="hidden" id="editPersonId" value=""/>
+				<div class="form-group">
+					<label>Name</label>
+					<input class="form-control" type="text" id="editPersonName" placeholder="Name" />
+				</div>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" onClick="editPersonDelete();"><span class="glyphicon glyphicon-trash"></span></button>
@@ -158,12 +156,10 @@
 				<h4 class="modal-title">Add Team</h4>
 			</div>
 			<div class="modal-body">
-				<form>
-					<div class="form-group">
-						<label>Team Name</label>
-						<input type="text" class="form-control" id="addTeamName" placeholder="Team Name" />
-					</div>
-				</form>
+				<div class="form-group">
+					<label>Team Name</label>
+					<input type="text" class="form-control" id="addTeamName" placeholder="Team Name" />
+				</div>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -181,13 +177,11 @@
 				<h4 class="modal-title">Edit Team</h4>
 			</div>
 			<div class="modal-body">
-				<form>
-					<input type="hidden" class="form-control" id="editTeamId" />
-					<div class="form-group">
-						<label>Team Name</label>
-						<input type="text" class="form-control" id="editTeamName" placeholder="Team Name" />
-					</div>
-				</form>
+				<input type="hidden" class="form-control" id="editTeamId" />
+				<div class="form-group">
+					<label>Team Name</label>
+					<input type="text" class="form-control" id="editTeamName" placeholder="Team Name" />
+				</div>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" onClick="editTeamDelete();"><span class="glyphicon glyphicon-trash"></span></button>
@@ -222,17 +216,15 @@
 				<h4 class="modal-title">Add Question</h4>
 			</div>
 			<div class="modal-body">
-				<form>
-					<input type="hidden" id="addQuestionRoundId" value="" />
-					<div class="form-group">
-						<label>Question</label>
-						<textarea class="form-control" id="addQuestionText" placeholder="Question"></textarea>
-					</div>
-					<div class="form-group">
-						<label>Answer</label>
-						<textarea class="form-control" id="addQuestionAnswer" placeholder="Answer"></textarea>
-					</div>
-				</form>
+				<input type="hidden" id="addQuestionRoundId" value="" />
+				<div class="form-group">
+					<label>Question</label>
+					<textarea class="form-control" id="addQuestionText" placeholder="Question"></textarea>
+				</div>
+				<div class="form-group">
+					<label>Answer</label>
+					<textarea class="form-control" id="addQuestionAnswer" placeholder="Answer"></textarea>
+				</div>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -250,18 +242,16 @@
 				<h4 class="modal-title">Edit Question</h4>
 			</div>
 			<div class="modal-body">
-				<form>
-					<input type="hidden" id="editQuestionRoundId" value="" />
-					<input type="hidden" id="editQuestionId" value="" />
-					<div class="form-group">
-						<label>Question</label>
-						<textarea class="form-control" id="editQuestionText" placeholder="Question"></textarea>
-					</div>
-					<div class="form-group">
-						<label>Answer</label>
-						<textarea class="form-control" id="editQuestionAnswer" placeholder="Answer"></textarea>
-					</div>
-				</form>
+				<input type="hidden" id="editQuestionRoundId" value="" />
+				<input type="hidden" id="editQuestionId" value="" />
+				<div class="form-group">
+					<label>Question</label>
+					<textarea class="form-control" id="editQuestionText" placeholder="Question"></textarea>
+				</div>
+				<div class="form-group">
+					<label>Answer</label>
+					<textarea class="form-control" id="editQuestionAnswer" placeholder="Answer"></textarea>
+				</div>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" onClick="editQuestionDelete();"><span class="glyphicon glyphicon-trash"></span></button>

@@ -216,16 +216,18 @@ function showRound(round_id) {
 /**
  * Code to deal with Questions
  */
-$('#addQuestion').on('show.bs.modal', function() {
-    $("#addQuestionText").val('');
-    $("#addQuestionAnswer").val('');
-})
-$('#addQuestion').on('shown.bs.modal', function() {
-    $("#addQuestionText").focus();
-})
-$('#editQuestion').on('shown.bs.modal', function() {
-    $("#editQuestionText").focus();
-})
+$(function(){
+	$('#addQuestion').on('show.bs.modal', function() {
+	    $("#addQuestionText").val('');
+	    $("#addQuestionAnswer").val('');
+	})
+	$('#addQuestion').on('shown.bs.modal', function() {
+	    $("#addQuestionText").focus();
+	})
+	$('#editQuestion').on('shown.bs.modal', function() {
+	    $("#editQuestionText").focus();
+	})
+});
 
 function addQuestion(round_id) {
     $("#addQuestionRoundId").val(round_id);
@@ -385,15 +387,27 @@ var TeamInfoView = Backbone.View.extend({
 	}
 });
 
-$('#addTeam').on('show.bs.modal', function() {
-    $("#addTeamName").val('');
-})
-$('#addTeam').on('shown.bs.modal', function() {
-    $("#addTeamName").focus();
-})
-$('#editTeam').on('shown.bs.modal', function() {
-    $("#editTeamName").focus();
-})
+$(function(){
+	$('#addTeam').on('show.bs.modal', function() {
+	    $("#addTeamName").val('');
+	})
+	$('#addTeam').on('shown.bs.modal', function() {
+	    $("#addTeamName").focus();
+	})
+	$('#editTeam').on('shown.bs.modal', function() {
+	    $("#editTeamName").focus();
+	})
+	$('#addTeamName').keyup(function (e) {
+	    if (e.which == 13) {
+	    	addTeamSave();
+	    }
+	});
+	$('#editTeamName').keyup(function (e) {
+	    if (e.which == 13) {
+	    	editTeamSave();
+	    }
+	});
+});
 
 function addTeam() {
 	$('#addTeam').modal('show');
@@ -474,11 +488,6 @@ function teamInfo(team_id) {
 		}
 	});
 	return false;
-	
-	//
-	//
-	
-	
 }
 
 function editTeamSave() {
@@ -519,15 +528,23 @@ var PersonListView = Backbone.View.extend({
 	}
 });
 
-$('#addPerson').on('show.bs.modal', function() {
-    $("#addPersonName").val('');
-})
-$('#addPerson').on('shown.bs.modal', function() {
-    $("#addPersonName").focus();
-})
-$('#editPerson').on('shown.bs.modal', function() {
-    $("#editPersonName").focus();
-})
+$(function(){
+	$('#addPerson').on('show.bs.modal', function() {
+	    $("#addPersonName").val('');
+	})
+	$('#addPerson').on('shown.bs.modal', function() {
+	    $("#addPersonName").focus();
+	})
+	$('#editPerson').on('shown.bs.modal', function() {
+	    $("#editPersonName").focus();
+	})
+	
+	$('#editPersonName').keyup(function (e) {
+	    if (e.which == 13) {
+	    	editPersonSave();
+	    }
+	});
+});
 
 function addPerson() {
 	$('#addPerson').modal();

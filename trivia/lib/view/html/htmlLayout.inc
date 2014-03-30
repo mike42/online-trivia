@@ -8,9 +8,16 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href="assets/favicon.ico">
 
-    <title>Trivia</title>
+    <title><?php 
+    if(isset($data['game'])) {
+    	echo core::escapeHTML($data['game'] -> get_game_name()) . " - Trivia";
+    } else {
+    	echo "Trivia";
+    }
+    ?></title>
     <link href="/public/css/bootstrap.min.css" rel="stylesheet">
     <link href="/public/css/trivia.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/public/question64px.png">
 <?php
     if(file_exists(dirname(__FILE__) . "/form/" . $data['template'] . "-header.inc")) {
 		include(dirname(__FILE__) . "/form/" . $data['template'] . "-header.inc");

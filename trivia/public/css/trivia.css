@@ -10,9 +10,22 @@ h1 a:hover {
 	text-decoration: none;
 }
 
+.question-row {
+	display: table;
+}
+
 .questions-left {
 	min-height: 300px;
 	border-right: 1px solid #ddd;
+	float: none;
+    display: table-cell;
+    vertical-align: top;
+}
+
+.questions-right {
+	 float: none;
+    display: table-cell;
+    vertical-align: top;
 }
 
 .lastround {
