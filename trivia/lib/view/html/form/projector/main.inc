@@ -29,7 +29,7 @@
 
 <div id="round" class="main-info jumbotron" style="display: none">
 	<h1 id="round-title">(Round title)</h1>
-	<p id="round-subtitle" class="lead">&nbsp;</p>
+	<p id="round-subtitle" class="lead question-text">&nbsp;</p>
 	<div class="row">
 		<div class="col-sm-6">
 		<?php

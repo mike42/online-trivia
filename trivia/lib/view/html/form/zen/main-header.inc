@@ -5,8 +5,8 @@
 <ul class="list-group">
 	<% _.each(question, function(question)  { %>
 	<li class="list-group-item">
-		<b><%= _.escape(question.question_sortkey) %>.</b> <%= _.escape(question.question_text) %><br/>
-		A. <%= _.escape(question.question_answer) %>
+		<b><%= _.escape(question.question_sortkey) %>.</b> <span class="question-text"><%= _.escape(question.question_text) %></span><br/>
+		A. <span class="question-text"><%= _.escape(question.question_answer) %></span>
 		<ul class="answer-list">
 		<% _.each(question.answer, function(a)  { %>
 			<li id="answer-q<%= _.escape(a.question_id) %>-t<%= _.escape(a.team_id) %>">

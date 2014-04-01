@@ -68,8 +68,8 @@
 		<% } %>
 		<a class="btn btn-default btn-xs" href="#" onClick="return editQuestion(<%= _.escape(question.question_id) %>)"><span class="glyphicon glyphicon-edit"></span></a>
 		</div>
-		<b><%= _.escape(question.question_sortkey) %>.</b> <%= _.escape(question.question_text) %><br/>
-		A. <%= _.escape(question.question_answer) %></li>
+		<b><%= _.escape(question.question_sortkey) %>.</b> <span class="question-text"><%= _.escape(question.question_text) %></span><br/>
+		A. <span class="question-text"><%= _.escape(question.question_answer) %></span></li>
 	<% }); %>
 	<li class="list-group-item">
 		<a class="btn btn-default" href="#" onClick="return addQuestion(<%=  _.escape(round_id) %>)"><span class="glyphicon glyphicon-plus"></span> Add A Question</a>

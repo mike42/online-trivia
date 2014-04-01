@@ -47,7 +47,15 @@ h1 a:hover {
 	font-weight: bold;
 }
 
+.answer-list li {
+	height: 22px;
+}
+
 .main-info {
   padding: 40px 15px;
   text-align: center;
+}
+
+.question-text {
+	white-space: pre-wrap;
 }

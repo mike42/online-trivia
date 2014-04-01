@@ -76,9 +76,9 @@ function add_people(team_model $team) {
 							'person_table.team_id' => $team -> get_team_id(),
 							'person_table.person_id' => $person -> get_person_id()));
 					$person_table -> insert();
-				} else { // Steal the person
-					$person_table -> set_team_id($team -> get_team_id());
-					$person_table -> update();
+				} else { // Cannot re-register at another table, to prevent sabotage.
+					//$person_table -> set_team_id($team -> get_team_id());
+					//$person_table -> update();
 				}
 				$set = true;
 			}

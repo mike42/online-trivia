@@ -53,6 +53,22 @@ class game_controller {
 		$game -> populate_list_person();
 		return $game -> to_array_filtered($role);
 	}
+	
+	public static function leaderboard($game_id = null) {
+		/* Check permission */
+		$role = session::getRole();
+		if(!isset(core::$permission[$role]['game']['read']) || count(core::$permission[$role]['game']['read']) == 0) {
+			return array('error' => 'You do not have permission to do that', 'code' => '403');
+		}
+	
+		if(!session::is_game_master($game_id)) {
+			return array('error' => 'Your permissions do not extend to other games.', 'code' => '403');
+		}
+	
+		/* Load game */
+		$game = game_model::get($game_id);
+		return $game -> getLeaderBoard();
+	}
 
 	public static function update($game_id = null) {
 		/* Check permission */

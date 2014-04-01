@@ -431,6 +431,9 @@ class game_model {
 		return $ret;
 	}
 	
+	/**
+	 * Delete all responses, sign-ups and points, so that a game can be repeated
+	 */
 	public function reset() {
 		$sth = database::$dbh -> prepare("DELETE team_round FROM team_round JOIN team ON team_round.team_team_id = team.team_id WHERE team.game_id = :game_id;");
 		$sth -> execute(array('game_id' => $this -> get_game_id()));
@@ -438,6 +441,24 @@ class game_model {
 		$sth -> execute(array('game_id' => $this -> get_game_id()));
 		$sth = database::$dbh -> prepare("DELETE person_table FROM person_table JOIN person ON person.person_id = person_table.person_id JOIN game ON person.game_id = game.game_id WHERE game.game_id = :game_id;");
 		$sth -> execute(array('game_id' => $this -> get_game_id()));
+	}
+	
+	/**
+	 * Get a list of people's scores (people who have not joined a tean are not included, eg absentees)
+	 * This report will be blank until the 'Zen Master' has started scoring
+	 */
+	public function getLeaderBoard() {
+		$query = "SELECT game_id, person.person_id, person.person_name, sum(points + bonus_points) AS score " .
+			"FROM person_table JOIN person ON person_table.person_id = person.person_id " .
+			"JOIN (SELECT answer.team_id, round.round_id, sum(answer_is_correct - 1) AS points FROM answer JOIN question ON question.question_id = answer.question_id JOIN round ON question.round_id = round.round_id WHERE round.game_id =:game_id1 AND answer_is_correct > 0 GROUP BY team_id, round_id) AS normalpts ON normalpts.team_id = person_table.team_id AND normalpts.round_id = person_table.round_id " .
+			"JOIN team_round ON team_round.team_team_id = person_table.team_id AND team_round.round_round_id = person_table.round_id " .
+			"WHERE person.game_id =:game_id2 " .
+			"GROUP BY game_id, person_id ORDER BY score DESC";
+		$data = array('game_id1' => $this -> get_game_id(), 'game_id2' => $this -> get_game_id());
+		$sth = database::$dbh -> prepare($query);
+		$sth -> execute($data);
+		$rows = $sth -> fetchAll(PDO::FETCH_ASSOC);
+		return $rows;
 	}
 }
 ?>

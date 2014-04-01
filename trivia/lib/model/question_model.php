@@ -222,7 +222,7 @@ class question_model {
 		if(!isset($this -> model_variables_set['question_text'])) {
 			throw new Exception("question.question_text has not been initialised.");
 		}
-		return $this -> question_text;
+		return trim($this -> question_text);
 	}
 
 	/**
@@ -232,7 +232,7 @@ class question_model {
 	 */
 	public function set_question_text($question_text) {
 		// TODO: Add TEXT validation to question.question_text
-		$this -> question_text = $question_text;
+		$this -> question_text = trim($question_text);
 		$this -> model_variables_changed['question_text'] = true;
 		$this -> model_variables_set['question_text'] = true;
 	}
@@ -298,7 +298,7 @@ class question_model {
 		if(!isset($this -> model_variables_set['question_answer'])) {
 			throw new Exception("question.question_answer has not been initialised.");
 		}
-		return $this -> question_answer;
+		return trim($this -> question_answer);
 	}
 
 	/**
@@ -308,7 +308,7 @@ class question_model {
 	 */
 	public function set_question_answer($question_answer) {
 		// TODO: Add TEXT validation to question.question_answer
-		$this -> question_answer = $question_answer;
+		$this -> question_answer = trim($question_answer);
 		$this -> model_variables_changed['question_answer'] = true;
 		$this -> model_variables_set['question_answer'] = true;
 	}
@@ -505,5 +505,7 @@ class question_model {
 		}
 		return $ret;
 	}
+	
+	// TODO: List of which teams have answered a question
 }
 ?>
