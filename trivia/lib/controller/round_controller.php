@@ -83,7 +83,7 @@ class round_controller {
 		if(!session::is_game_master($round -> get_game_id())) {
 			return array('error' => 'Your permissions do not extend to other games', 'code' => '403');
 		}
-		return $round -> getTeamCounts();
+		return $round -> get_team_counts();
 	}
 
 	public static function detailed($round_id = null) {

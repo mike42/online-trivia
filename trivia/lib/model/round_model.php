@@ -451,9 +451,9 @@ class round_model {
 	/**
 	 * Return number of people who have registered on each team this round
 	 */
-	public function getTeamCounts() {
-		$sql = "SELECT game_id, team_id, team_name, (SELECT count(person_id) FROM person_table WHERE person_table.team_id = team.team_id AND round_id = :round_id) AS members FROM team WHERE game_id = :game_id ORDER BY team_name";
-		$data = array('round_id' => $this -> get_round_id(), game_id' => $this -> get_game_id());
+	public function get_team_counts() {
+		$query = "SELECT game_id, team_id, team_name, (SELECT count(person_id) FROM person_table WHERE person_table.team_id = team.team_id AND round_id = :round_id) AS num FROM team WHERE game_id = :game_id ORDER BY team_name";
+		$data = array('round_id' => $this -> get_round_id(), 'game_id' => $this -> get_game_id());
 		$sth = database::$dbh -> prepare($query);
 		$sth -> execute($data);
 		$rows = $sth -> fetchAll(PDO::FETCH_ASSOC);

@@ -4,7 +4,8 @@ var in_game = false;
 var cur_round = 0;
 var cur_q = 0;
 
-// TODO team status queries
+// div#team-status
+// div#leaderboard-frame
 
 function prev() {
 	if(!in_game) {

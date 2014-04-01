@@ -506,6 +506,13 @@ class question_model {
 		return $ret;
 	}
 	
-	// TODO: List of which teams have answered a question
+	function get_respondents() {
+		$query = "SELECT game_id, team_id, team_name, (SELECT count(question_id) FROM answer WHERE answer.team_id = team.team_id AND question_id =:question_id) AS num FROM team WHERE team.game_id =:game_id ORDER BY team_name";
+		$data = array('question_id' => $this -> get_question_id(), 'game_id' => $this -> round -> get_game_id());
+		$sth = database::$dbh -> prepare($query);
+		$sth -> execute($data);
+		$rows = $sth -> fetchAll(PDO::FETCH_ASSOC);
+		return $rows;
+	}
 }
 ?>

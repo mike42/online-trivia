@@ -30,31 +30,7 @@
 <div id="round" class="main-info jumbotron" style="display: none">
 	<h1 id="round-title">(Round title)</h1>
 	<p id="round-subtitle" class="lead question-text">&nbsp;</p>
-	<div class="row">
-		<div class="col-sm-6">
-		<?php
-			$odd = $even = array();
-			$is_odd = true;
-			foreach($data['game'] -> list_team as $team) {
-				if($is_odd) {
-					$odd[] = $team;
-				} else {
-					$even[] = $team;
-				}
-				$is_odd = !$is_odd;
-			}
-			
-			foreach($odd as $team) {
-				echo "<h3><span id=\"team-".(int)$team -> get_team_id()."\" class=\"label label-default\">0</span> ".$team -> get_team_name() ."</h3>\n";
-			}
-		?>
-		</div>
-		<div class="col-sm-6">
-		<?php
-			foreach($even as $team) {
-				echo "<h3><span id=\"team-".(int)$team -> get_team_id()."\" class=\"label label-default\">0</span> ".$team -> get_team_name() ."</h3>\n";
-			}
-		?>
-		</div>
+	<div class="row" id="team-status">
+		
 	</div>
 </div>

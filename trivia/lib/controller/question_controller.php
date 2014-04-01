@@ -67,6 +67,24 @@ class question_controller {
 		// $question -> populate_list_answer();
 		return $question -> to_array_filtered($role);
 	}
+	
+	public static function respondents($question_id = null) {
+		/* Check permission */
+		$role = session::getRole();
+		if(!isset(core::$permission[$role]['question']['read']) || count(core::$permission[$role]['question']['read']) == 0) {
+			return array('error' => 'You do not have permission to do that', 'code' => '403');
+		}
+	
+		/* Load question */
+		$question = question_model::get($question_id);
+		if(!$question) {
+			return array('error' => 'question not found', 'code' => '404');
+		}
+		if(!session::is_game_member($question -> round -> get_game_id())) {
+			return array('error' => 'Your permissions do not extend to other games', 'code' => '403');
+		}
+		return $question -> get_respondents();
+	}
 
 	public static function status($question_id = null) {
 		/* Check permission */
