@@ -80,8 +80,8 @@ class question_controller {
 		if(!$question) {
 			return array('error' => 'question not found', 'code' => '404');
 		}
-		if(!session::is_game_member($question -> round -> get_game_id())) {
-			return array('error' => 'Your permissions do not extend to other games', 'code' => '403');
+		if(!session::is_game_master($question -> round -> get_game_id())) {
+			return array('error' => 'You do not have permission to do that', 'code' => '403');
 		}
 		return $question -> get_respondents();
 	}
