@@ -4,6 +4,8 @@ var in_game = false;
 var cur_round = 0;
 var cur_q = 0;
 
+// TODO team status queries
+
 function prev() {
 	if(!in_game) {
 		return false;
@@ -43,22 +45,26 @@ function setRound(num) {
 
 }
 
+function showAnswers(num) {
+	tabTo('answers');
+}
+
 function setQuestion(num) {
 	$('#round-subtitle').text('');
 	if(num >= 0 && num < game.round[cur_round].question.length) {
+		tabTo('round');
 		cur_q = num;
 		$('#round-subtitle').text(game.round[cur_round].question[cur_q].question_text);
 		in_game = true;
 	} else if(num >= game.round[cur_round].question.length) {
 		cur_q = game.round[cur_round].question.length;
-		$('#round-subtitle').text('Answers');
+		showAnswers(num);
 		in_game = true;
 	} else if(num < 0){
 		cur_q = -1;
 		$('#round-subtitle').text('Signup');
 		in_game = true;
 	}
-	
 }
 
 function tabTo(id) {

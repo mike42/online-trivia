@@ -23,6 +23,10 @@
 	<div id="leaderboard-frame"></div>
 </div>
 
+<div id="answers" class="main-info jumbotron" style="display: none">
+	<h1>Answers</h1>
+</div>
+
 <div id="round" class="main-info jumbotron" style="display: none">
 	<h1 id="round-title">(Round title)</h1>
 	<p id="round-subtitle" class="lead">&nbsp;</p>

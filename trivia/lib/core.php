@@ -35,7 +35,12 @@ class core {
 	 * @return unknown
 	 */
 	static public function getConfig($section) {
-		include(dirname(__FILE__) . "/../site/config.php");
+		$fn = dirname(__FILE__) . "/../site/config.php";
+		if(!file_exists($fn)) {
+			throw new Exception("This site has not been configured yet. See README.md.");
+		}
+		
+		include($fn);
 		if(!isset($config[$section])) {
 			throw new Exception("No configuration found for '$section'");
 		}
