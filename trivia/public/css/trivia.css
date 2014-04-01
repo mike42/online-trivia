@@ -59,3 +59,13 @@ h1 a:hover {
 .question-text {
 	white-space: pre-wrap;
 }
+
+.leaderboard-table {
+	margin-left: auto;
+	margin-right: auto;
+	font-size: 300%;
+}
+
+.leaderboard-table td {
+	padding-right: 0.5em;
+}

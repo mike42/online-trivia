@@ -45,7 +45,7 @@
 		</div>
 		<div id="box-finish" class="panel-body" style="display: none">
 			<p>You've reached the end of the game! See you next time.</p>
-			<p><a href="/">Return to home page</a></p>
+			<p><a href="/">Go to home page, where you can create your own game</a></p>
 		</div>
 		<div id="box-question" class="panel-body" style="display: none; text-align: center;">
 			<h2 id="question-title">..</h2>
