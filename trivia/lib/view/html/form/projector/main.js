@@ -5,6 +5,7 @@ var cur_round = 0;
 var cur_q = 0;
 
 var refresh = 'none';
+var status_url = '';
 
 /* Team status code */
 var team_status_model = Backbone.Model.extend({
@@ -18,9 +19,18 @@ var team_status_model = Backbone.Model.extend({
 var team_status_collection = Backbone.Collection.extend({
 	model: team_status_model
 });
-// div#team-status
-// /api/round/team_counts/:round_id
-// /api/question/repsondents/:question_id
+var TeamStatusView = Backbone.View.extend({
+	model: team_status_model,
+	el: 'div#team-status',
+	template: _.template($('#template-status').html()),
+
+	render : function() {
+		this.$el.html(this.template({
+			team_status_list: this.collection.toJSON()
+		}));
+		return this;
+	}
+});
 
 /* Leader board code */
 var leaderboard_model = Backbone.Model.extend({
@@ -99,22 +109,52 @@ function setQuestion(num) {
 		tabTo('round');
 		cur_q = num;
 		$('#round-subtitle').text(game.round[cur_round].question[cur_q].question_text);
+		setStatusURL('/api/question/respondents/' + game.round[cur_round].question[cur_q].question_id);
 		in_game = true;
 	} else if(num >= game.round[cur_round].question.length) {
 		cur_q = game.round[cur_round].question.length;
 		showAnswers(num);
 		in_game = true;
+		setStatusURL('');
 	} else if(num < 0){
 		cur_q = -1;
-		signup(cur_round);		
 		in_game = true;
+		signup(cur_round);
 	}
 }
 
 function signup(cur_round) {
 	$('#round-subtitle').text('Signup');
+	setStatusURL('/api/round/team_counts/' + game.round[cur_round].round_id);
+}
+
+function setStatusURL(url) {
+	if(status_url != url) {
+		$('div#team-status').html('<img src="/public/loading.gif" />')
+		status_url = url;
+		updateStatus();
+	}
+}
+
+function updateStatus() {
+	if(!in_game || status_url == '') {
+		/* Don't bother */
+		return;
+	}
 	
-	
+	var team_status = new team_status_collection();
+	team_status.fetch({
+		url: status_url,
+		success : function(results) {
+			var db = new TeamStatusView({
+				collection: team_status
+			});
+			db.render();
+		},
+		error : function(model, response) {
+			// Ignore errors, will be reloaded in good time.
+		}
+	});
 }
 
 function tabTo(id) {
@@ -136,7 +176,13 @@ function leaderBoard() {
 			db.render();
 		},
 		error : function(model, response) {
-			handleFailedRequest(response);
+			// handleFailedRequest(response);
 		}
 	});
 }
+
+$(function() {
+	window.setInterval(function(){ 
+		//  updateStatus();
+	}, 3000)
+});
