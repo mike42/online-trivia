@@ -11,26 +11,26 @@
 	?>
 </div>
 
-<div id="title-pane" class="main-info jumbotron">
+<div id="title-pane" class="main-info jumbotron full">
 	<h1><?php echo core::escapeHTML($data['game'] -> get_game_name()); ?></h1>
 	<p class="lead">
 		<img src="/public/question-box.png" style="width: 30%"/>
 	</p>
 </div>
 
-<div id="leaderboard" class="main-info jumbotron" style="display: none">
+<div id="leaderboard" class="main-info jumbotron full" style="display: none">
 	<h1>Leader Board</h1>
 	<div id="leaderboard-frame"></div>
 </div>
 
-<div id="answers" class="main-info jumbotron" style="display: none">
+<div id="answers" class="main-info jumbotron full" style="display: none">
 	<h1>Answers</h1>
+	<div id="answer-frame"></div>
 </div>
 
-<div id="round" class="main-info jumbotron" style="display: none">
+<div id="round" class="main-info jumbotron full" style="display: none">
 	<h1 id="round-title">(Round title)</h1>
-	<p id="round-subtitle" class="lead question-text">&nbsp;</p>
+	<h1 id="round-subtitle" class="lead question-text">&nbsp;</h1>
 	<div class="row" id="team-status">
-		
 	</div>
 </div>

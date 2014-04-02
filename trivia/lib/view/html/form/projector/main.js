@@ -47,13 +47,24 @@ var leaderboard_collection = Backbone.Collection.extend({
 });
 
 var LeaderboardView = Backbone.View.extend({
-	model: round_model,
 	el: 'div#leaderboard-frame',
 	template: _.template($('#template-leaderboard').html()),
 
 	render : function() {
 		this.$el.html(this.template({
 			leaderboard_list: this.collection.toJSON()
+		}));
+		return this;
+	}
+});
+
+/* Answer View */
+var AnswerView = Backbone.View.extend({
+	el: 'div#answer-frame',
+	template: _.template($('#template-answer').html()),
+	render : function() {
+		this.$el.html(this.template({
+			question_list: this.collection.toJSON()
 		}));
 		return this;
 	}
@@ -101,6 +112,13 @@ function setRound(num) {
 
 function showAnswers(num) {
 	tabTo('answers');
+	var questions = new question_collection(game.round[cur_round].question);
+	
+	var db = new AnswerView({
+		collection: questions
+	});
+	db.render();
+	
 }
 
 function setQuestion(num) {
@@ -130,7 +148,7 @@ function signup(cur_round) {
 
 function setStatusURL(url) {
 	if(status_url != url) {
-		$('div#team-status').html('<img src="/public/loading.gif" />')
+		$('div#team-status').html('<img src="/public/loading.gif" />');
 		status_url = url;
 		updateStatus();
 	}
@@ -163,6 +181,7 @@ function tabTo(id) {
 }
 
 function leaderBoard() {
+	$('div#leaderboard-frame').html('<img src="/public/loading.gif" />');
 	tabTo('leaderboard');
 	in_game = false;
 
@@ -176,13 +195,13 @@ function leaderBoard() {
 			db.render();
 		},
 		error : function(model, response) {
-			// handleFailedRequest(response);
+			$('div#leaderboard-frames').html('Uh oh! Better hit reload. :(')
 		}
 	});
 }
 
 $(function() {
 	window.setInterval(function(){ 
-		//  updateStatus();
+		updateStatus();
 	}, 3000)
 });

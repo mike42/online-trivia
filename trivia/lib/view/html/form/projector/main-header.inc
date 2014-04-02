@@ -1,3 +1,11 @@
+<style>
+	body, html {height: 100%; margin: 0px; padding: 0px;  overflow: hidden}
+	.full, .container {height: 100%; margin-bottom: 0; overflow: hidden}
+	.container {overflow: hidden}
+	.full {overflow-y: auto}
+		
+</style>
+
 <script type="text/template" id="template-leaderboard">
 	<table class="leaderboard-table">
 	<%
@@ -11,7 +19,7 @@
 			lastscore = leader.score;
 		}
 	%>
-	<tr><td class="leader-rank"><%= _.escape(rank) %></td><td class="leader-name"><%= _.escape(leader.person_name) %></td><td class="leader-score"><%= _.escape(leader.score) %></td></tr>
+	<tr><td class="leader-rank"><%= _.escape(rank) %>.</td><td class="leader-name"><%= _.escape(leader.person_name) %></td><td class="leader-score"><%= _.escape(leader.score) %></td></tr>
 	<% }); %>
 	</table>
 </script>
@@ -44,4 +52,15 @@
 		<% } %>
 	<% }); %>
 	</div>
+</script>
+
+<script type="text/template" id="template-answer">
+<ul>
+	<% _.each(question_list, function(question)  { %>
+		<li>
+		<b><%= _.escape(question.question_sortkey) %>.</b> <span class="question-text"><%= _.escape(question.question_text) %></span><br/>
+		A. <span class="question-text"><%= _.escape(question.question_answer) %></span>
+		</li>
+	<% }); %>
+</ul>
 </script>

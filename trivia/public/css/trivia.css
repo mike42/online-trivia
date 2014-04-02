@@ -63,9 +63,26 @@ h1 a:hover {
 .leaderboard-table {
 	margin-left: auto;
 	margin-right: auto;
-	font-size: 300%;
+	font-size: 35px;
 }
 
 .leaderboard-table td {
 	padding-right: 0.5em;
+}
+
+.leader-rank {
+	font-weight: bold;
+}
+
+h1#round-title {
+	font-size: 40px;
+}
+
+h1#round-subtitle {
+	font-size: 50px;
+}
+
+#answer-frame ul {
+	font-size: 35px;
+	list-style-type: none;
 }
