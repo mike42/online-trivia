@@ -1,3 +1,14 @@
+<h1>
+	<a
+		href="/game/<?php echo core::escapeHTML($data['game'] -> get_game_code()); ?>"><?php echo core::escapeHTML($data['game'] -> get_game_name()); ?>
+	</a>
+</h1>
+
+<div id="errbox" style="display: none" class="alert alert-warning">
+	<span id="errmsg">.</span> <span class="glyphicon glyphicon-remove"
+		style="float: right" onClick="errClose()"></span>
+</div>
+
 <div class="panel panel-success">
 	<div class="panel-heading">
 		<h3 class="panel-title">
